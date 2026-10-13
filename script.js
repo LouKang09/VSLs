@@ -85,6 +85,19 @@ function render(data){
 }
 async function loadPublic(){
   try{
+    if(new URLSearchParams(location.search).get("preview")==="draft"){
+      const preview=await fetch("/api/admin/content",{cache:"no-store",credentials:"same-origin"});
+      if(preview.ok){
+        const data=await preview.json();
+        render(data.draft);
+        const ribbon=document.createElement("div");
+        ribbon.className="draft-ribbon";
+        ribbon.textContent="ADMIN PREVIEW — Saved draft, not visible to buyers. ";
+        const back=document.createElement("a");back.href="/admin";back.textContent="Return to content studio ↗";
+        ribbon.append(back);document.body.prepend(ribbon);
+        return;
+      }
+    }
     const response=await fetch("/api/public",{cache:"no-store"});
     if(!response.ok)throw Error("Could not load published page");
     render(await response.json());

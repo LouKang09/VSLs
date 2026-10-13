@@ -1,13 +1,15 @@
 "use strict";
 const $ = selector=>document.querySelector(selector);
 const $$ = selector=>[...document.querySelectorAll(selector)];
-const state={content:null,leads:[],currentTab:"overview",editingVideo:-1,uploading:false};
+const state={content:null,leads:[],orders:[],currentTab:"overview",editingVideo:-1,uploading:false};
 const fields=[
   "brand","eyebrow","headline1","headline2","subtitle","storyTitle","storyHighlight","storyParagraph1",
   "storyParagraph2","shiftText","methodTitle","methodHighlight","methodSubtitle","offerHeading",
   "offerHighlight","offerSubtitle","offerName","offerDescription","price","priceNote","cta","checkoutUrl",
   "trustTitle","trustHighlight","trustText","closingTitle","closingLine2","closingHighlight","videoUrl",
-  "footerNote","supportEmail","accent"
+  "footerNote","supportEmail","accent",
+  "checkoutAmount","checkoutGcashName","checkoutGcashNumber",
+  "checkoutBankName","checkoutBankAccountName","checkoutBankAccountNumber","checkoutInstructions"
 ];
 const titles={
   overview:["Overview","Your content, under control.","Edit your message and publish changes instantly to the buyer-facing website."],
@@ -17,6 +19,8 @@ const titles={
   offer:["Offer & pricing","Give your offer a clear value.","Edit what's included, the price and your real checkout or booking destination."],
   faq:["FAQs & trust","Help buyers feel confident.","Answer questions accurately and reinforce your message."],
   leads:["Buyer inquiries","A conversation starts here.","View the real inquiries people submitted on your public website."],
+  checkout:["Checkout & payments","Turn interest into an order.","Choose a price, offer manual payment options and enable your own checkout website."],
+  orders:["Orders","Track every checkout order.","Review pending sales, verify manual transfers and manage fulfillment."],
   settings:["Brand & settings","Make it yours.","Update your visual identity and secure your admin credentials."]
 };
 const flash=(message,error=false)=>{
@@ -53,7 +57,8 @@ function showTab(tab){
   $$(".panel").forEach(el=>el.hidden=el.dataset.panel!==tab);
   const [short,title,subtitle]=titles[tab]||titles.overview;
   $("#breadcrumb").textContent=short;$("#panelTitle").textContent=title;$("#panelSubtitle").textContent=subtitle;
-  $("#publishActions").hidden=tab==="leads";
+  $("#publishActions").hidden=tab==="leads"||tab==="orders";
+  if(tab==="orders")refreshOrders();
   if(tab==="leads")refreshLeads();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -84,6 +89,10 @@ function setSteps(items){
 function fillContent(data){
   state.content=structuredClone(data);
   fields.forEach(key=>{const el=document.querySelector('[data-field="'+key+'"]');if(el)el.value=data[key]|| (key==="accent"?"#6477e6":"");});
+  ["checkoutEnabled","checkoutGcashEnabled","checkoutBankEnabled","checkoutArrangeEnabled"].forEach(key=>{
+    const input=document.querySelector('[data-setting="'+key+'"]');
+    if(input)input.checked=data[key]===true;
+  });
   $("#offerItemsInput").value=(data.offerItems||[]).join("\n");
   setSteps(data.steps||[]);
   $("#faqEditors").replaceChildren();
@@ -95,6 +104,10 @@ function fillContent(data){
 function collectContent(){
   const content={...state.content};
   fields.forEach(key=>{const el=document.querySelector('[data-field="'+key+'"]');if(el)content[key]=el.value.trim();});
+  ["checkoutEnabled","checkoutGcashEnabled","checkoutBankEnabled","checkoutArrangeEnabled"].forEach(key=>{
+    const input=document.querySelector('[data-setting="'+key+'"]');
+    if(input)content[key]=input.checked;
+  });
   content.offerItems=$("#offerItemsInput").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,10);
   content.steps=$$(".step-item").map(card=>({
     title:card.querySelector(".step-name").value.trim(),
@@ -273,6 +286,79 @@ $("#videoFile").addEventListener("change",event=>uploadSelected(event,"video"));
 $("#posterFile").addEventListener("change",event=>uploadSelected(event,"poster"));
 videoForm.elements.namedItem("featured").addEventListener("change",e=>{if(e.target.checked)videoForm.elements.namedItem("visible").checked=true;});
 
+
+const paymentNames={gcash:"GCash transfer",bank:"Bank transfer",arrange:"Seller arrangement"};
+async function refreshOrders(){
+  try{
+    const data=await request("/api/admin/orders");
+    state.orders=data.orders||[];
+    $("#ordersCountSmall").textContent=String(data.count||0);
+    $("#ordersTotal").textContent=String(data.count||0);
+    $("#ordersBadge").textContent=String(data.count||0)+" orders";
+    $("#ordersUnpaid").textContent=String(state.orders.filter(o=>o.paymentStatus!=="verified"&&o.fulfillmentStatus!=="cancelled").length);
+    $("#ordersVerified").textContent=String(state.orders.filter(o=>o.paymentStatus==="verified").length);
+    renderOrders();
+  }catch(err){flash("Could not load orders: "+err.message,true);}
+}
+function orderDetail(label,value){
+  const d=document.createElement("div");
+  const k=document.createElement("small"),v=document.createElement("strong");
+  k.textContent=label;v.textContent=value||"—";d.append(k,v);return d;
+}
+function renderOrders(){
+  const root=$("#ordersList");root.replaceChildren();
+  if(!state.orders.length){
+    const empty=document.createElement("div");empty.className="orders-placeholder";
+    empty.textContent="No orders yet. New checkout submissions will appear here.";root.append(empty);return;
+  }
+  for(const o of state.orders){
+    const card=document.createElement("article");card.className="admin-order";
+    const top=document.createElement("div");top.className="admin-order-top";
+    const heading=document.createElement("div"),num=document.createElement("h3");
+    num.textContent=o.ref;
+    const date=document.createElement("small");date.textContent=prettyDate(o.createdAt);
+    heading.append(num,date);
+    const status=document.createElement("span");
+    status.className="order-badge "+(o.fulfillmentStatus==="cancelled"?"cancelled":o.paymentStatus==="verified"?"verified":o.paymentStatus==="submitted"?"submitted":"pending");
+    status.textContent=o.fulfillmentStatus==="cancelled"?"Cancelled":o.fulfillmentStatus==="fulfilled"?"Fulfilled":o.paymentStatus==="verified"?"Payment verified":o.paymentStatus==="submitted"?"Reference submitted":"Pending payment";
+    top.append(heading,status);
+    const details=document.createElement("div");details.className="admin-order-details";
+    for(const [label,value] of [
+      ["Customer",o.customerName],["Email",o.email],["Phone",o.phone],
+      ["Product",o.product],["Amount","₱"+(Number(o.amountCents)/100).toFixed(2)],
+      ["Payment method",paymentNames[o.method]||o.method],
+      ["Payment reference",o.paymentReference||"None submitted"],
+      ["Fulfillment",o.fulfillmentStatus]
+    ])details.append(orderDetail(label,value));
+    if(o.notes){const p=document.createElement("p");p.className="admin-order-notes";p.textContent="Buyer note: "+o.notes;card.append(top,details,p);}
+    else card.append(top,details);
+    const actions=document.createElement("div");actions.className="admin-order-actions";
+    const make=(label,action,className="")=>{
+      const b=document.createElement("button");b.type="button";b.textContent=label;b.className=className;
+      b.addEventListener("click",async()=>{
+        if(action==="verify"&&!confirm("Have you independently confirmed receiving the payment for "+o.ref+"?"))return;
+        if(action==="cancel"&&!confirm("Cancel order "+o.ref+"?"))return;
+        b.disabled=true;
+        try{
+          await request("/api/admin/orders/update",{method:"POST",body:JSON.stringify({ref:o.ref,action})});
+          await refreshOrders();
+          flash("Order "+o.ref+" updated.");
+        }catch(err){flash("Could not update order: "+err.message,true);}
+        finally{b.disabled=false;}
+      });actions.append(b);
+    };
+    if(o.fulfillmentStatus==="cancelled")make("Reopen order","reopen");
+    else{
+      if(o.paymentStatus!=="verified")make("Verify payment","verify","order-verify");
+      else make("Undo payment verification","unverify");
+      if(o.fulfillmentStatus==="fulfilled")make("Mark not fulfilled","reopen");
+      else if(o.paymentStatus==="verified")make("Mark fulfilled","fulfill","order-fulfill");
+      make("Cancel order","cancel","order-cancel");
+    }
+    card.append(actions);root.append(card);
+  }
+}
+
 async function refreshLeads(){
   try{
     const data=await request("/api/admin/leads");
@@ -307,6 +393,7 @@ async function loadEditor(username){
   showDashboard(username);
   showTab("overview");
   refreshLeads();
+  refreshOrders();
 }
 async function start(){
   try{

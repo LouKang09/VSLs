@@ -83,7 +83,7 @@ function setSteps(items){
 }
 function fillContent(data){
   state.content=structuredClone(data);
-  fields.forEach(key=>{const el=document.querySelector('[data-field="'+key+'"]');if(el)el.value=data[key]|| (key==="accent"?"#db6042":"");});
+  fields.forEach(key=>{const el=document.querySelector('[data-field="'+key+'"]');if(el)el.value=data[key]|| (key==="accent"?"#6477e6":"");});
   $("#offerItemsInput").value=(data.offerItems||[]).join("\n");
   setSteps(data.steps||[]);
   $("#faqEditors").replaceChildren();

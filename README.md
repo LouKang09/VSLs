@@ -1,63 +1,64 @@
-# VSLs — Live Video Sales Letter CMS
+# VSLs — Video Sales Letter Website & CMS
 
-A public Video Sales Letter (VSL) landing page with a separate password-protected content studio for the owner.
+A responsive, conversion-focused website and admin publishing studio, deployed from GitHub to Railway. **No Floot dependency.**
 
-**Live website:** https://vsls-web-production.up.railway.app  
-**Admin dashboard:** https://vsls-web-production.up.railway.app/admin  
-**Source:** https://github.com/LouKang09/VSLs  
-**Hosting:** Railway project `vsls`, service `vsls-web`, auto-deployed from `main`.
+**Public buyer site:** https://vsls-web-production.up.railway.app  
+**Admin:** https://vsls-web-production.up.railway.app/admin  
+**GitHub:** https://github.com/LouKang09/VSLs  
+**Railway:** Project "vsls" → service "vsls-web" → \`main\`
 
-## How it works
+## What's new in v2
 
-- **Public buyers** see only the published sales letter with a hero, video, problem/solution story, four method cards, offer, pricing, FAQ, and closing CTA.
-- **Admin** signs in at `/admin`, edits headlines, text, benefits, FAQs, colors, video URL, offer pricing and external checkout link.
-- **Save draft** stores a private, unpublished version. **Preview saved draft** is viewable only to an authenticated admin via `/?preview=draft`. **Publish changes** updates the public `/api/public` data instantly.
-- If no checkout URL is set, the buyer CTA opens an inquiry form. Submissions are persisted, listed in the lead inbox, exportable to CSV, and individually deletable.
-- No payment card details are collected by this server. Checkout links open third-party payment/booking websites in a new tab.
+- Entirely redesigned buyer website: high-contrast dark hero, featured-video theater, responsive video library with category filters, streamlined sales story, process, offer, FAQ and call-to-action.
+- Redesigned admin dashboard: page content, video library, process, offers, FAQs, buyer inquiries, brand settings and password change.
+- **Multiple videos:** add up to 36 YouTube/Vimeo/MP4/WebM videos to one library; title, description, category and optional custom cover for each video.
+- **Direct file uploads:** upload MP4/WebM files (up to 120 MB each) and JPG/PNG/WebP cover images (up to 8 MB each). Files persist on Railway at \`/data/media\`, not in GitHub.
+- **Per-video controls:** mark videos visible or hidden from buyers, choose the hero featured video, change order with up/down buttons, edit or remove from the library.
+- **Staged publishing:** Save draft stores changes privately. Preview at \`/?preview=draft\` requires a logged-in admin. Publish site replaces public content and video selection immediately, with no redeploy.
+- **Buyer conversion:** a real checkout/booking link can open in a separate tab. Without checkout configured, calls-to-action open an inquiry form. Inquiries are saved to persistent storage and listed in admin, with CSV export and deletion.
 
-## Initial admin setup
+## Publishing your first videos
 
-On the first visit to `/admin`, create the owner account. Use the one-time setup token provisioned as the Railway service environment variable `ADMIN_SETUP_TOKEN` (provided privately to the owner), then choose a username and a password of at least 12 characters.
+1. Sign in at \`/admin\`.
+2. Select **Video library** → **Add video**.
+3. Provide a title and description and either paste a YouTube/Vimeo/direct video URL or upload a video file.
+4. Optionally provide a cover image (URL or upload).
+5. Check **Show to buyers**. Optionally check **Feature this video** to place it in the large video theater at the top of the website.
+6. Save video to library. Repeat for more videos and reorder as needed.
+7. Click **Save draft** for a private preview, or **Publish site** to update the live buyer website. Only visible videos appear in the public video collection.
 
-After setup, the token cannot create another account. All future sign-ins use the new username and password. The owner can change the password under **Brand & settings**.
+**Important:** Saving a video to the library changes the admin's working copy. A video is not published to buyers until the site is published. Existing published videos remain visible until a new version replaces them.
 
-### Security
+## Architecture
 
-- Passwords are hashed with Node.js scrypt and a random salt.
-- Sessions use signed, expiring HttpOnly / Secure / SameSite=Strict cookies.
-- Admin APIs require a valid session; mutation endpoints validate request origin.
-- Login/setup and lead submission endpoints are rate-limited.
-- Private content, credentials, and inquiry records are persisted in Railway's mounted volume at `/data`; they are **never committed to GitHub**.
+- **Node.js 20+** built-in HTTP server, static HTML/CSS/JavaScript; no npm packages.
+- Backend routes: \`/api/public\`, \`/api/leads\`, \`/api/admin/content\`, \`/api/admin/draft\`, \`/api/admin/publish\`, \`/api/admin/media\`, \`/api/admin/leads\`, \`/api/admin/leads.csv\`, \`/api/admin/password\`; file streaming via \`/media/<uuid>.<ext>\`.
+- Persistent Railway volume \`vsls-content-storage\` mounted on \`/data\`, holding \`content.json\`, \`leads.json\`, \`admin.json\`, and uploaded media.
+- Previously published content and account credentials are retained across code deploys. Legacy single-video content is automatically adapted to the new multi-video format.
+- Passwords are stored as salted scrypt hashes, with signed HttpOnly Secure SameSite sessions. Admin writes and uploads require authentication plus same-origin checks. Upload content is validated with file signatures and subject to size limits.
 
-### Railway environment variables
+## Administrator credentials
 
-- `DATA_DIR=/data`
-- `NODE_ENV=production`
-- `SESSION_SECRET` — long random value, set securely in Railway
-- `ADMIN_SETUP_TOKEN` — random one-time bootstrap token, set securely in Railway
-- `PORT` — supplied automatically by Railway
+Existing admin usernames and passwords remain valid. For an entirely new installation, the first visit to \`/admin\` prompts a one-time setup with \`ADMIN_SETUP_TOKEN\` from Railway plus a chosen username and password (12+ characters). Once created, the account cannot be reinitialized using the setup token. Passwords can be changed under **Settings**.
 
-**Persistent volume:** `vsls-content-storage`, mounted at `/data`.
+Required production variables:
+- \`SESSION_SECRET\` — long secret used to sign sessions
+- \`ADMIN_SETUP_TOKEN\` — strong first-time setup key
+- \`DATA_DIR=/data\`
+- \`NODE_ENV=production\`
 
-The service exposes `/health` for Railway deployment health checks.
+Railway sets \`PORT\` automatically. Service health endpoint is \`/health\`.
 
-## Local development
+## Run locally
 
-Requires Node.js 20 or later. No npm dependencies are required.
-
-```bash
+\`\`\`bash
 npm start
-```
+\`\`\`
 
-Open `http://localhost:3000`. Locally, private data defaults to `.local-data/`. Do not check this folder into Git. For production, configure the required environment variables and persistent volume.
+Open http://localhost:3000. Local persistence defaults to \`.local-data/\` (gitignored).
 
-## Before launching a paid campaign
+## Before selling a product
 
-1. Sign in and replace the initial starter content with your actual product or service, price, contact details, and brand.
-2. Add a real YouTube, Vimeo, or direct MP4 sales video. Without a URL, buyers see an unconfigured presentation placeholder.
-3. Add a legitimate HTTPS checkout or booking URL. Without one, buyers can submit an inquiry.
-4. Review the FAQ, business contact details, privacy notice, fulfillment, terms and refund policy.
-5. Use only genuine testimonials, verifiable claims and accurate descriptions.
-6. Test the entire checkout/order fulfillment outside this site before running ads.
+The website is a fully functioning public landing page and CMS, **not** a built-in payment processor or hosted checkout. Provide real video content, accurate product/service copy, pricing, an external checkout/booking URL, contact details, and business-specific privacy/fulfillment/refund/terms information before running paid campaigns.
 
-The CMS currently manages one public VSL landing page with one administrator. It is not a built-in payment processor, membership platform, video hosting service, or multi-tenant website builder.
+Avoid unverified testimonials, guaranteed earnings, and misleading urgency claims. Video uploads are stored on the Railway volume and consume available storage; deleting an entry from the video list currently removes it from site content but does not erase the original uploaded file from disk.

@@ -29,3 +29,7 @@ dialog{border:0;box-shadow:0 35px 110px #181d1bb0;background:#fffdf8;color:#2125
 .honeypot{position:absolute!important;left:-9999px!important;opacity:0!important;pointer-events:none!important}
 .price-block strong{overflow-wrap:anywhere}
 @media(max-width:600px){.price-block strong{font-size:26px;line-height:1.25}}
+
+
+.draft-ribbon{position:sticky;top:0;z-index:120;background:#243328;color:#fff6e8;text-align:center;padding:11px 14px;font-size:12px;font-weight:700;border-bottom:2px solid #e69273}
+.draft-ribbon a{color:#f5aa88;text-decoration:underline;margin-left:8px}

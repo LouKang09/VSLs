@@ -239,11 +239,19 @@ async function handleApi(req,res,pathname){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||body.consent!==true)return fail(res,400,"Valid email and consent required");
     const leads=readJSON(files.leads,[]);
     if(leads.length>=50000)return fail(res,503,"Submission capacity reached");
-    leads.push({at:new Date().toISOString(),email,name,message,consent:true});
+    leads.push({id:crypto.randomUUID(),at:new Date().toISOString(),email,name,message,consent:true});
     atomicWrite(files.leads,leads);
     return json(res,201,{ok:true,message:"Thanks. Your message was received."});
   }
   if(!verifySession(req))return fail(res,401,"Sign in to continue");
+  if(pathname==="/api/admin/leads/delete"){
+    const id=clean(body.id,80);
+    const existing=readJSON(files.leads,[]);
+    const filtered=existing.filter(l=>l.id!==id);
+    if(filtered.length===existing.length)return fail(res,404,"Inquiry not found");
+    atomicWrite(files.leads,filtered);
+    return json(res,200,{ok:true,deleted:1});
+  }
   if(pathname==="/api/admin/logout")return clearSession(res);
   if(pathname==="/api/admin/password"){
     const admin=readJSON(files.admin,null);

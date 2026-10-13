@@ -1,0 +1,12 @@
+{
+  "name": "vsls-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Customizable video sales letter landing page",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

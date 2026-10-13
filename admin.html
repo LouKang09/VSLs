@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#182522"><title>VSLs Admin — Content Studio</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/admin.css"><script defer src="/admin.js"></script></head>
+<body>
+<div id="authShell" class="auth-shell" hidden>
+  <div class="auth-illustration"><a href="/" class="auth-brand"><span class="brand-icon">⌁</span> VSLs <small>CONTENT STUDIO</small></a><div class="auth-quote"><div class="star">✳</div><h1>Sell a better<br><em>story.</em></h1><p>All the tools to shape your message, update your offer and publish it when you're ready.</p><div class="auth-decoration">CREATE · REFINE · PUBLISH ↗</div></div></div>
+  <div class="auth-right">
+    <div class="auth-panel" id="loginPanel" hidden>
+      <p class="overline">WELCOME BACK</p><h2>Sign in to your studio.</h2><p class="help-copy">Manage what your customers see. Your login stays private.</p>
+      <form id="loginForm" class="stacked-form">
+        <label>Username<input name="username" required autocomplete="username" placeholder="admin"></label>
+        <label>Password<input name="password" required type="password" autocomplete="current-password" placeholder="Your password"></label>
+        <div role="status" class="form-error" id="loginError"></div>
+        <button type="submit" class="primary-button">Sign in <span>→</span></button>
+      </form>
+      <a href="/" class="auth-back">← View public website</a>
+    </div>
+    <div class="auth-panel" id="setupPanel" hidden>
+      <p class="overline">FIRST-TIME SETUP</p><h2>Secure your admin account.</h2><p class="help-copy">Use the one-time setup key provided during deployment. Pick your own username and a strong password of at least 12 characters.</p>
+      <form id="setupForm" class="stacked-form">
+        <label>Setup key<input name="token" required type="password" autocomplete="off" placeholder="One-time setup key"></label>
+        <label>Admin username<input name="username" minlength="3" maxlength="70" required autocomplete="username" placeholder="admin"></label>
+        <label>New password<input name="password" type="password" minlength="12" maxlength="128" required autocomplete="new-password" placeholder="At least 12 characters"></label>
+        <label>Confirm password<input name="confirm" type="password" minlength="12" required autocomplete="new-password" placeholder="Repeat the password"></label>
+        <div role="status" class="form-error" id="setupError"></div>
+        <button type="submit" class="primary-button">Create admin account <span>→</span></button>
+      </form>
+      <p class="form-note">The setup key cannot be used again once the account is created.</p>
+    </div>
+  </div>
+</div>
+<div class="loading-shell" id="loadingShell"><div class="loading-symbol">✳</div><strong>Preparing your content studio…</strong></div>
+<div class="dashboard" id="dashboard" hidden>
+  <aside class="sidebar">
+    <a href="/" class="sidebar-logo"><span class="brand-icon">⌁</span><span>VSLs <small>CONTENT STUDIO</small></span></a>
+    <div class="sidebar-label">WORKSPACE</div>
+    <nav aria-label="Admin sections" class="sidebar-nav" id="sidebarNav">
+      <button data-tab="overview" class="active"><span class="nav-icon">◫</span> Overview</button>
+      <button data-tab="hero"><span class="nav-icon">✳</span> Headline &amp; story</button>
+      <button data-tab="method"><span class="nav-icon">◈</span> How it works</button>
+      <button data-tab="offer"><span class="nav-icon">◇</span> Offer &amp; pricing</button>
+      <button data-tab="faq"><span class="nav-icon">☷</span> FAQs &amp; trust</button>
+      <button data-tab="leads"><span class="nav-icon">✉</span> Buyer inquiries <span class="nav-counter" id="leadCountSmall">0</span></button>
+      <button data-tab="settings"><span class="nav-icon">⚙</span> Brand &amp; settings</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-user"><span class="avatar">A</span><span><strong id="loggedUser">Administrator</strong><small>Site administrator</small></span></div><button id="logoutButton" class="sidebar-logout">Log out ↗</button></div>
+  </aside>
+  <div class="main-area">
+    <header class="admin-topbar"><div class="crumb">VSLs <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="top-status"><i></i> Public site online</span><a href="/" target="_blank" rel="noopener" class="preview-link">View buyer website ↗</a></div></header>
+    <main class="dashboard-content">
+      <div class="page-heading"><div><p class="overline">YOUR SALES PAGE</p><h1 id="panelTitle">Your content, under control.</h1><p id="panelSubtitle">Edit your message and publish changes instantly to the buyer-facing website.</p></div><div class="heading-actions" id="publishActions"><button type="button" id="saveDraft" class="secondary-button">Save draft</button><button type="button" id="publishNow" class="primary-button">Publish changes <span>↗</span></button></div></div>
+      <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+
+      <section class="panel" data-panel="overview">
+        <div class="overview-stats">
+          <div class="stat-card"><div class="stat-head">SITE STATUS <span>↗</span></div><strong class="stat-live">Published</strong><small>Your public website is available to buyers</small></div>
+          <div class="stat-card"><div class="stat-head">LEADS RECEIVED <span>✉</span></div><strong id="totalLeads">—</strong><small>Inquiries saved securely in your workspace</small></div>
+          <div class="stat-card"><div class="stat-head">LAST PUBLISHED <span>◷</span></div><strong class="stat-date" id="lastPublished">—</strong><small>Changes are visible as soon as you publish</small></div>
+        </div>
+        <div class="overview-layout">
+          <div class="editor-card"><p class="overline">QUICK START</p><h2>Make this website yours.</h2><p>Replace the starter copy with your real product or service, add the video that explains it and connect your checkout or booking link.</p><div class="quick-actions"><button class="quick-action" data-go="hero"><span>01</span><strong>Write your headline</strong><span>→</span></button><button class="quick-action" data-go="offer"><span>02</span><strong>Configure your offer</strong><span>→</span></button><button class="quick-action" data-go="faq"><span>03</span><strong>Answer buyer questions</strong><span>→</span></button></div></div>
+          <div class="tip-card"><div class="tip-icon">✳</div><p class="overline">GOOD TO KNOW</p><h3>Draft or publish.<br>You're in charge.</h3><p><strong>Save draft</strong> keeps your edits private. <strong>Publish changes</strong> updates the buyer website instantly without a GitHub push or Railway rebuild.</p><a href="/" target="_blank" rel="noopener">See the live website ↗</a></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="hero" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">ABOVE THE FOLD</p><h2>Headline &amp; video</h2></div><span class="section-pill">SECTION 01</span></div>
+          <div class="input-grid"><label class="full">Eyebrow / small heading<input data-field="eyebrow" maxlength="140"></label><label>Headline — first line<input data-field="headline1" maxlength="140"></label><label>Headline — highlighted line<input data-field="headline2" maxlength="140"></label><label class="full">Hero description<textarea data-field="subtitle" rows="3" maxlength="800"></textarea></label><label class="full">VSL video URL <small>YouTube, Vimeo, or direct MP4. The public page loads your video when visitors press Play.</small><input data-field="videoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label></div>
+        </div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">PROBLEM / SOLUTION</p><h2>Tell the story</h2></div><span class="section-pill">SECTION 02</span></div>
+          <div class="input-grid"><label>Problem headline<input data-field="storyTitle"></label><label>Highlighted phrase<input data-field="storyHighlight"></label><label class="full">Problem paragraph 1<textarea data-field="storyParagraph1" rows="2"></textarea></label><label class="full">Problem paragraph 2<textarea data-field="storyParagraph2" rows="2"></textarea></label><label class="full">The shift / key takeaway<textarea data-field="shiftText" rows="2"></textarea></label></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="method" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">YOUR PROCESS</p><h2>Explain your method</h2></div><span class="section-pill">SECTION 03</span></div>
+          <div class="input-grid"><label>Section headline<input data-field="methodTitle"></label><label>Highlighted phrase<input data-field="methodHighlight"></label><label class="full">Intro paragraph<textarea data-field="methodSubtitle" rows="3"></textarea></label></div>
+        </div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">FOUR CLEAR STEPS</p><h2>The step-by-step journey</h2></div></div><div class="step-editor-grid" id="stepEditors"></div></div>
+      </section>
+
+      <section class="panel" data-panel="offer" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">WHAT BUYERS GET</p><h2>Your product or service</h2></div><span class="section-pill">SECTION 04</span></div>
+          <div class="input-grid"><label>Section headline<input data-field="offerHeading"></label><label>Highlighted phrase<input data-field="offerHighlight"></label><label class="full">Section intro<textarea data-field="offerSubtitle" rows="2"></textarea></label><label class="full">Product / service name<input data-field="offerName" required></label><label class="full">Product description<textarea data-field="offerDescription" rows="3"></textarea></label><label class="full">Included benefits or features <small>One item per line, up to 10 lines</small><textarea id="offerItemsInput" rows="6"></textarea></label><label>Price shown to buyers<input data-field="price" placeholder="e.g. ₱1,490 or Contact for pricing"></label><label>Price detail<input data-field="priceNote" placeholder="e.g. One-time payment"></label><label>Call-to-action button<input data-field="cta" placeholder="e.g. Get access now"></label><label>Checkout / booking URL <small>If left blank, the button opens the inquiry form instead.</small><input data-field="checkoutUrl" type="url" placeholder="https://your-checkout.com"></label></div>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="faq" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">TRUST &amp; CLARITY</p><h2>How you build confidence</h2></div></div><div class="input-grid"><label>Trust headline<input data-field="trustTitle"></label><label>Highlighted phrase<input data-field="trustHighlight"></label><label class="full">Trust section paragraph<textarea data-field="trustText" rows="3"></textarea></label></div></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">BUYER QUESTIONS</p><h2>Frequently asked questions</h2></div><button type="button" class="secondary-button" id="addFaq">+ Add FAQ</button></div><div id="faqEditors" class="faq-editors"></div><p class="muted-note">Write clear, accurate answers. Avoid promises you cannot verify.</p></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">FINAL CALL TO ACTION</p><h2>Close the story</h2></div></div><div class="input-grid"><label>Headline line 1<input data-field="closingTitle"></label><label>Headline line 2<input data-field="closingLine2"></label><label class="full">Highlighted closing line<input data-field="closingHighlight"></label></div></div>
+      </section>
+
+      <section class="panel" data-panel="leads" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">CUSTOMER CONTACTS</p><h2>Buyer inquiries <span id="leadsBadge" class="section-pill">0</span></h2></div><a href="/api/admin/leads.csv" class="secondary-button">Export CSV ↓</a></div><p class="muted-note">When a buyer uses the inquiry form, their message appears here. Contact them using the provided email address only for their inquiry.</p><div class="leads-table-wrapper"><table class="leads-table"><thead><tr><th>DATE</th><th>NAME</th><th>EMAIL</th><th>MESSAGE</th></tr></thead><tbody id="leadsRows"><tr><td colspan="4">No inquiries yet.</td></tr></tbody></table></div></div>
+      </section>
+
+      <section class="panel" data-panel="settings" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">YOUR IDENTITY</p><h2>Brand &amp; appearance</h2></div></div><div class="input-grid"><label>Brand name<input data-field="brand" required></label><label>Accent color <small>Changes buttons, highlights and accents</small><input type="color" data-field="accent" class="color-field"></label><label class="full">Footer brand statement<input data-field="footerNote"></label><label class="full">Support email <small>Store a contact email for your business details</small><input data-field="supportEmail" type="email" placeholder="hello@business.com"></label></div></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">SECURITY</p><h2>Change admin password</h2></div></div><form id="passwordForm" class="input-grid"><label class="full">Current password<input type="password" name="currentPassword" autocomplete="current-password" required></label><label>New password<input type="password" name="newPassword" minlength="12" maxlength="128" autocomplete="new-password" required></label><label>Confirm new password<input type="password" name="confirmPassword" minlength="12" autocomplete="new-password" required></label><div class="full"><button class="primary-button" type="submit">Update password →</button></div></form></div>
+      </section>
+    </main>
+  </div>
+</div>
+</body></html>

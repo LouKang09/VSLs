@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,follow"><meta name="theme-color" content="#131924">
+<title>Checkout | VSLs</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/checkout.css"><script src="/checkout.js" defer></script>
+</head><body>
+<header class="checkout-nav"><div class="nav-wrap">
+<a href="/" class="brand"><span class="brand-mark">▥</span><span id="navBrand">VSLs</span><b>.</b></a>
+<div class="secure-pill"><span class="check-circle">✓</span> Secure order form</div>
+<a class="back-link" href="/">← Return to website</a></div></header>
+<main class="checkout-shell">
+<div class="checkout-intro"><p class="overline"><span class="tiny-circle"></span> SIMPLE, TRANSPARENT CHECKOUT</p><h1>Your next step<br><span>starts here.</span></h1><p>Review your order, add your details, and choose how you would like to arrange payment.</p></div>
+<div id="pageNotice" class="notice" role="status" hidden></div>
+<div id="checkoutLoading" class="loading-row"><span class="loader"></span> Loading the latest offer…</div>
+<div id="checkoutUnavailable" class="unavailable" hidden><div class="unavailable-symbol">◎</div><h2>Checkout isn’t available yet.</h2><p>This product isn’t configured for orders at the moment. You can still explore the sales page and get in touch with the business.</p><a href="/" class="button button-primary">Back to the sales page <span>↗</span></a></div>
+<div id="checkoutView" class="checkout-layout" hidden>
+ <section class="purchase-panel" aria-labelledby="customerHeading">
+ <div class="panel-heading"><span class="step-number">01</span><div><span class="panel-overline">BUYER DETAILS</span><h2 id="customerHeading">Who is this order for?</h2></div></div>
+ <form id="checkoutForm" autocomplete="on">
+   <div class="field-grid"><label>Full name <span>REQUIRED</span><input name="name" autocomplete="name" required minlength="2" maxlength="120" placeholder="Your full name"></label>
+   <label>Email address <span>REQUIRED</span><input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@example.com"></label></div>
+   <label class="wide-field">Mobile number <span>OPTIONAL</span><input name="phone" inputmode="tel" autocomplete="tel" maxlength="35" placeholder="+63 9XX XXX XXXX"></label>
+   <div class="section-separator"></div>
+   <div class="panel-heading payment-heading"><span class="step-number">02</span><div><span class="panel-overline">PAYMENT PREFERENCE</span><h2>Select a payment method</h2></div></div>
+   <p class="payment-explain">Payment methods are administered by the seller. Your order remains pending until payment is manually verified.</p>
+   <div id="paymentMethods" class="payment-methods" role="radiogroup" aria-label="Choose a payment method"></div>
+   <label class="wide-field">Order notes <span>OPTIONAL</span><textarea name="notes" rows="3" maxlength="600" placeholder="Anything you’d like the seller to know?"></textarea></label>
+   <label class="agreement"><input type="checkbox" name="accepted" required><span>I understand this creates a pending order, not an automatic payment. I agree to the <a href="/privacy" target="_blank" rel="noopener">privacy notice</a> and to being contacted about this order.</span></label>
+   <input name="website" type="text" class="honeypot" autocomplete="off" tabindex="-1" aria-hidden="true">
+   <p class="form-status" id="formStatus" role="alert"></p>
+   <button type="submit" id="placeOrderButton" class="button button-primary submit-order">Place pending order <span>→</span></button>
+   <div class="order-helper"><span>⌁</span> No payment card information is collected on this website.</div>
+ </form></section>
+ <aside class="summary-panel"><div class="summary-top"><span class="summary-label">YOUR ORDER</span><span class="summary-pill">1 ITEM</span></div>
+ <div class="product-art"><div class="product-grid"></div><div class="art-shape">↗</div><div class="art-bottom">THE NEXT MOVE <span>VSL / 001</span></div></div>
+ <div class="summary-product"><span>OFFER</span><h3 id="productName">Your product</h3><p id="productDescription">Offer details</p></div>
+ <div class="summary-line"><span>Quantity</span><strong>1</strong></div><div class="summary-line"><span>Subtotal</span><strong id="summarySubtotal">₱0.00</strong></div>
+ <div class="summary-total"><span>Total due</span><strong id="summaryTotal">₱0.00</strong></div>
+ <div class="summary-note"><span>◎</span><p>You’ll receive an order reference after submitting. The merchant will manually review payments and fulfill confirmed orders.</p></div>
+ </aside>
+</div>
+<div id="checkoutSuccess" class="success-layout" hidden>
+ <section class="receipt"><div class="success-icon">✓</div><p class="overline">ORDER RECEIVED</p><h2 id="successTitle">Your order is in.</h2><p class="success-sub">We’ve saved your order. This is <strong>not a payment confirmation</strong> or proof of fulfillment.</p>
+ <div class="reference-block"><div><small>ORDER REFERENCE</small><strong id="receiptReference">—</strong></div><button type="button" id="copyReference">Copy <span>⧉</span></button></div>
+ <div class="receipt-items"><div><span>Product</span><strong id="receiptProduct">—</strong></div><div><span>Total</span><strong id="receiptAmount">—</strong></div><div><span>Payment method</span><strong id="receiptMethod">—</strong></div><div><span>Payment status</span><strong id="receiptPaymentStatus" class="status-pill">Unpaid</strong></div><div><span>Order status</span><strong id="receiptFulfillmentStatus">New order</strong></div></div>
+ <div id="paymentNextSteps" class="next-steps"></div>
+ <form id="paymentRefForm" class="payment-ref-form" hidden><label>Payment transaction reference <span>AFTER TRANSFERRING</span><input name="paymentReference" required minlength="5" maxlength="100" placeholder="Enter your transfer reference"></label><button type="submit" class="button button-outline" id="sendReference">Submit payment reference <span>→</span></button><p id="refMessage" role="status"></p></form>
+ <p class="receipt-warning">Keep your order reference and this private link. You can return here to view the latest payment and order status. No charge was made by this website.</p>
+ <div class="receipt-actions"><button type="button" class="button button-outline" id="refreshStatus">Refresh order status ↻</button><a href="/" class="button button-primary">Return to site ↗</a></div>
+ </section></div>
+</main>
+<footer class="checkout-footer"><div class="nav-wrap"><span>© <span id="copyright"></span> <span id="footerBrand">VSLs</span></span><a href="/privacy">Privacy notice</a><span>QUESTIONS? CONTACT THE SELLER</span></div></footer>
+</body></html>

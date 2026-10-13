@@ -29,6 +29,20 @@ A responsive, conversion-focused website and admin publishing studio, deployed f
 
 **Important:** Saving a video to the library changes the admin's working copy. A video is not published to buyers until the site is published. Existing published videos remain visible until a new version replaces them.
 
+## Checkout website and manual payment workflow
+
+- **Live checkout page:** https://vsls-web-production.up.railway.app/checkout
+- **Admin:** `/admin` → **Checkout & payments** sets a fixed PHP price, enables checkout, configures GCash recipient details, bank account details, or seller-arranged payment.
+- The site starts with checkout **disabled** until the administrator publishes a valid nonzero price. This prevents accidental purchases of an incorrectly priced sample offer.
+- When enabled, the public sales page's buy buttons link to `/checkout`. A buyer submits full name and email, optional phone/notes, selects a payment method, and confirms they understand the manual-payment process.
+- The server determines the amount using published data (buyer-supplied prices are ignored), saves each order with a unique reference, and returns a private status link.
+- A GCash/bank buyer can submit the payment reference after transferring funds. This changes status to **reference submitted**, **not paid**.
+- **Admin** → **Orders** shows customer details, payment references, amounts, and statuses; only the admin can verify payments, mark fulfillment, reopen or cancel an order. Orders can be exported to CSV.
+- Receipt/status links require an unpredictable access token. Payment instructions are snapshotted at purchase time so later merchant settings do not change an earlier order's transfer details.
+- Buyer records are persisted in `/data/orders.json` on Railway, alongside existing content and inquiries.
+
+**Payment limitation:** This release supports order capture and **manual payment verification**. It does *not* automatically collect money, query GCash balances, connect to a payment gateway, issue official tax receipts, deliver files, or automatically email receipts. Automated GCash/cards requires a merchant account and a supported gateway integration (for example PayMongo) with webhook verification. Do not mark an order paid until you independently verify funds.
+
 ## Architecture
 
 - **Node.js 20+** built-in HTTP server, static HTML/CSS/JavaScript; no npm packages.

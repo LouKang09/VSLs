@@ -73,7 +73,7 @@ test("VSL CMS protects drafts, publishes selected videos, and persists uploads",
   assert.equal((await api("/api/admin/media",{method:"POST",headers:{"Origin":origin,"Content-Type":"image/png"},body:png})).status,401);
   assert.equal((await api("/api/admin/draft",{method:"POST",headers:{"Origin":"https://attacker.example","Cookie":cookie,"Content-Type":"application/json"},body:JSON.stringify({content})})).status,403);
   assert.equal((await post("/api/admin/logout",{},cookie)).status,200);
-  assert.equal((await api("/api/admin/content",{headers:{"Cookie":cookie}})).status,200,"Original stateless token remains valid until expiration after logout; client clears cookie");
+  assert.equal((await api("/api/admin/content",{headers:{"Cookie":cookie}})).status,401,"Logout must revoke the session token");
  }finally{
   child.kill("SIGTERM");
   await pause(180);

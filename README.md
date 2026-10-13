@@ -1,46 +1,63 @@
-# VSLs — Video Sales Letter Website
+# VSLs — Live Video Sales Letter CMS
 
-A fully responsive, conversion-focused VSL landing page hosted on Railway, with source code in GitHub.
+A public Video Sales Letter (VSL) landing page with a separate password-protected content studio for the owner.
 
-## Website
+**Live website:** https://vsls-web-production.up.railway.app  
+**Admin dashboard:** https://vsls-web-production.up.railway.app/admin  
+**Source:** https://github.com/LouKang09/VSLs  
+**Hosting:** Railway project `vsls`, service `vsls-web`, auto-deployed from `main`.
 
-- **Production:** https://vsls-web-production.up.railway.app
-- **GitHub:** https://github.com/LouKang09/VSLs
-- **Technology:** HTML, CSS, vanilla JavaScript, Node.js HTTP server (no paid framework required)
-- **Port:** Railway's `PORT` environment variable is automatically honored
-- **Health endpoint:** `/health`
+## How it works
 
-## What's included
+- **Public buyers** see only the published sales letter with a hero, video, problem/solution story, four method cards, offer, pricing, FAQ, and closing CTA.
+- **Admin** signs in at `/admin`, edits headlines, text, benefits, FAQs, colors, video URL, offer pricing and external checkout link.
+- **Save draft** stores a private, unpublished version. **Preview saved draft** is viewable only to an authenticated admin via `/?preview=draft`. **Publish changes** updates the public `/api/public` data instantly.
+- If no checkout URL is set, the buyer CTA opens an inquiry form. Submissions are persisted, listed in the lead inbox, exportable to CSV, and individually deletable.
+- No payment card details are collected by this server. Checkout links open third-party payment/booking websites in a new tab.
 
-- VSL hero headline, video stage and play button
-- Problem / solution storytelling, method cards, digital-product offer, FAQs, final CTA
-- Responsive mobile design with sticky offer button
-- Editable demo settings: brand, headlines, sales copy, video link, price, button label, accent color, checkout link
-- YouTube, Vimeo and direct MP4 support
-- Safe checkout URL handling and helpful prompts when video/checkout URLs are missing
-- No fabricated testimonials, reviews or guarantees
+## Initial admin setup
 
-## Customize
+On the first visit to `/admin`, create the owner account. Use the one-time setup token provisioned as the Railway service environment variable `ADMIN_SETUP_TOKEN` (provided privately to the owner), then choose a username and a password of at least 12 characters.
 
-Open the website and choose **Edit demo** to preview your changes. Note: the edit panel uses the current browser's `localStorage` only; edits are not synchronized for visitors. For **permanent, public changes**, modify the defaults in `script.js` and the sales sections in `index.html`, then commit to `main`. Railway automatically deploys commits when the GitHub source is connected.
+After setup, the token cannot create another account. All future sign-ins use the new username and password. The owner can change the password under **Brand & settings**.
 
-## Run locally
+### Security
 
-Requires Node.js 20+.
+- Passwords are hashed with Node.js scrypt and a random salt.
+- Sessions use signed, expiring HttpOnly / Secure / SameSite=Strict cookies.
+- Admin APIs require a valid session; mutation endpoints validate request origin.
+- Login/setup and lead submission endpoints are rate-limited.
+- Private content, credentials, and inquiry records are persisted in Railway's mounted volume at `/data`; they are **never committed to GitHub**.
+
+### Railway environment variables
+
+- `DATA_DIR=/data`
+- `NODE_ENV=production`
+- `SESSION_SECRET` — long random value, set securely in Railway
+- `ADMIN_SETUP_TOKEN` — random one-time bootstrap token, set securely in Railway
+- `PORT` — supplied automatically by Railway
+
+**Persistent volume:** `vsls-content-storage`, mounted at `/data`.
+
+The service exposes `/health` for Railway deployment health checks.
+
+## Local development
+
+Requires Node.js 20 or later. No npm dependencies are required.
 
 ```bash
 npm start
 ```
 
-Open http://localhost:3000
+Open `http://localhost:3000`. Locally, private data defaults to `.local-data/`. Do not check this folder into Git. For production, configure the required environment variables and persistent volume.
 
-## Production checklist
+## Before launching a paid campaign
 
-- Replace demo offer and example price with actual product/service information
-- Add the final VSL video URL (YouTube/Vimeo/direct MP4)
-- Connect a real checkout/booking link and customer support details
-- Replace demo FAQ text, add privacy policy, terms and accurate refund/delivery policies
-- Use only authentic customer testimonials and evidence-backed performance claims
-- Verify on desktop and mobile before ad campaigns
+1. Sign in and replace the initial starter content with your actual product or service, price, contact details, and brand.
+2. Add a real YouTube, Vimeo, or direct MP4 sales video. Without a URL, buyers see an unconfigured presentation placeholder.
+3. Add a legitimate HTTPS checkout or booking URL. Without one, buyers can submit an inquiry.
+4. Review the FAQ, business contact details, privacy notice, fulfillment, terms and refund policy.
+5. Use only genuine testimonials, verifiable claims and accurate descriptions.
+6. Test the entire checkout/order fulfillment outside this site before running ads.
 
-Changes pushed to `main` can be redeployed through Railway.
+The CMS currently manages one public VSL landing page with one administrator. It is not a built-in payment processor, membership platform, video hosting service, or multi-tenant website builder.

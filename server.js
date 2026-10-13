@@ -174,7 +174,7 @@ function readBody(req,max=60000){
     req.on("error",reject);
   });
 }
-const staticFiles={"/":"index.html","/index.html":"index.html","/styles.css":"styles.css","/script.js":"script.js","/admin":"admin.html","/admin.html":"admin.html","/admin.js":"admin.js","/admin.css":"admin.css","/favicon.svg":"favicon.svg","/robots.txt":"robots.txt"};
+const staticFiles={"/":"index.html","/index.html":"index.html","/styles.css":"styles.css","/script.js":"script.js","/admin":"admin.html","/admin.html":"admin.html","/admin.js":"admin.js","/admin.css":"admin.css","/favicon.svg":"favicon.svg","/robots.txt":"robots.txt","/privacy": "privacy.html","/privacy.html":"privacy.html"};
 const mimes={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".svg":"image/svg+xml",".txt":"text/plain; charset=utf-8"};
 function serveStatic(req,res,pathname){
   const name=staticFiles[pathname];

@@ -1,140 +1,145 @@
 "use strict";
-const KEY = "vsls-demo-settings-v1";
-const defaults = Object.freeze({
-  brand:"GOODFORM", eyebrow:"THE CREATOR LAUNCH SYSTEM",
-  headline1:"The idea is there.", headline2:"Now make it happen.",
-  subtitle:"A thoughtful, step-by-step way to turn what you know into a digital product worth sharing. Less second-guessing. More meaningful progress.",
-  offerName:"The Creator Launch System",
-  offerDescription:"A practical digital playbook for turning one good idea into a real, ready-to-share offer.",
-  price:"₱1,490", cta:"Get the playbook",
-  videoUrl:"",checkoutUrl:"",accent:"#db6042"
-});
-function loadSettings(){
-  try{
-    const raw=JSON.parse(localStorage.getItem(KEY));
-    if(!raw || typeof raw!=="object")return {...defaults};
-    const out={};
-    for(const key of Object.keys(defaults))out[key]=typeof raw[key]==="string"?raw[key]:defaults[key];
-    return out;
-  }catch{return {...defaults};}
-}
-let settings=loadSettings();
-const site=document.querySelector(".site");
-const editorDialog=document.getElementById("editorDialog");
-const checkoutDialog=document.getElementById("checkoutDialog");
-const editorForm=document.getElementById("editorForm");
-const videoPlayer=document.getElementById("videoPlayer");
-const videoArt=document.getElementById("videoArt");
-function safeHttpUrl(text){
-  if(!text || !text.trim())return null;
-  try{
-    const url=new URL(text.trim());
-    return url.protocol==="https:"||url.protocol==="http:"?url:null;
-  }catch{return null;}
-}
-function getVideoSource(value){
-  const u=safeHttpUrl(value);
-  if(!u)return null;
-  const host=u.hostname.toLowerCase().replace(/^www\./,"");
+let siteContent = null;
+const by = selector => document.querySelector(selector);
+const text = (selector,value) => { const el=by(selector);if(el && typeof value==="string")el.textContent=value; };
+const rich = (selector,regular,highlight) => {
+  const el=by(selector);if(!el)return;
+  el.replaceChildren(document.createTextNode(regular||""), document.createElement("br"));
+  const em=document.createElement("em");em.textContent=highlight||"";el.appendChild(em);
+};
+const safeUrl = value => {
+  try {const u=new URL(value);return ["https:","http:"].includes(u.protocol)?u:null;}catch{return null;}
+};
+function getVideo(value){
+  const u=safeUrl(value);if(!u)return null;
+  const hostname=u.hostname.toLowerCase().replace(/^www\./,"");
   let id="";
-  if(host==="youtu.be")id=u.pathname.split("/")[1]||"";
-  if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(host))id=u.searchParams.get("v")||(u.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/)||[])[1]||"";
+  if(hostname==="youtu.be")id=u.pathname.split("/")[1]||"";
+  if(["youtube.com","m.youtube.com","youtube-nocookie.com"].includes(hostname))id=u.searchParams.get("v")||(u.pathname.match(/^\/(?:shorts|live|embed)\/([^/]+)/)||[])[1]||"";
   if(/^[A-Za-z0-9_-]{11}$/.test(id))return {type:"iframe",url:"https://www.youtube-nocookie.com/embed/"+id+"?rel=0&autoplay=1"};
-  if(host==="vimeo.com"||host==="player.vimeo.com"){
-    const v=u.pathname.split("/").find(seg=>/^\d+$/.test(seg));
-    if(v)return {type:"iframe",url:"https://player.vimeo.com/video/"+v+"?autoplay=1"};
+  if(["vimeo.com","player.vimeo.com"].includes(hostname)){
+    const videoId=u.pathname.split("/").find(s=>/^\d+$/.test(s));
+    if(videoId)return {type:"iframe",url:"https://player.vimeo.com/video/"+videoId+"?autoplay=1"};
   }
   if(/\.mp4$/i.test(u.pathname))return {type:"video",url:u.href};
   return null;
 }
-function resetVideo(){videoPlayer.replaceChildren();videoPlayer.hidden=true;videoArt.hidden=false;}
-function renderSettings(){
-  document.querySelectorAll("[data-text]").forEach(node=>{
-    const key=node.getAttribute("data-text");
-    if(Object.prototype.hasOwnProperty.call(settings,key))node.textContent=settings[key];
+function renderSteps(items){
+  const cards=document.querySelectorAll(".step-card");
+  if(!Array.isArray(items))return;
+  cards.forEach((card,i)=>{const item=items[i];if(!item)return;
+    const title=card.querySelector("h3"),p=card.querySelector("p");
+    if(title)title.textContent=item.title||"";if(p)p.textContent=item.description||"";
   });
-  const accent=/^#[0-9a-fA-F]{6}$/.test(settings.accent)?settings.accent:defaults.accent;
-  document.documentElement.style.setProperty("--accent",accent);
-  if(site)site.style.setProperty("--accent",accent);
-  document.title=settings.brand+" | "+settings.headline1+" "+settings.headline2;
-  document.querySelector('meta[name="description"]').setAttribute("content",settings.subtitle);
-  resetVideo();
 }
-function openEditor(){
-  for(const [key,value] of Object.entries(settings)){
-    const field=editorForm.elements.namedItem(key);
-    if(field && "value" in field)field.value=value;
+function renderOffer(items){
+  const list=by(".offer-includes");if(!list||!Array.isArray(items))return;
+  list.replaceChildren();
+  for(const item of items){const li=document.createElement("li");
+    const tick=document.createElement("span");tick.textContent="✓";
+    li.appendChild(tick);li.appendChild(document.createTextNode(" "+item));list.appendChild(li);
   }
-  if(checkoutDialog.open)checkoutDialog.close();
-  if(!editorDialog.open)editorDialog.showModal();
 }
-document.querySelectorAll("[data-open-editor]").forEach(node=>node.addEventListener("click",openEditor));
-document.getElementById("closeEditor").addEventListener("click",()=>editorDialog.close());
-document.getElementById("closeCheckout").addEventListener("click",()=>checkoutDialog.close());
-document.getElementById("configureCheckout").addEventListener("click",openEditor);
-editorForm.addEventListener("submit",event=>{
-  event.preventDefault();
-  const updated={}, data=new FormData(editorForm);
-  for(const [key,fallback] of Object.entries(defaults)){
-    const v=data.get(key);
-    updated[key]=typeof v==="string"?v.trim().slice(0,key==="subtitle"?450:300):fallback;
+function renderFaqs(items){
+  const list=by(".faq-list");if(!list||!Array.isArray(items))return;
+  list.replaceChildren();
+  items.forEach((item,index)=>{
+    const details=document.createElement("details"),summary=document.createElement("summary"),num=document.createElement("span"),plus=document.createElement("i"),p=document.createElement("p");
+    num.textContent=String(index+1).padStart(2,"0");plus.textContent="+";
+    summary.append(num,document.createTextNode(" "+item.question+" "),plus);
+    p.textContent=item.answer;details.append(summary,p);list.appendChild(details);
+  });
+}
+function render(data){
+  siteContent=data;
+  document.documentElement.style.setProperty("--accent",/^#[0-9a-fA-F]{6}$/.test(data.accent)?data.accent:"#db6042");
+  for(const el of document.querySelectorAll("[data-text]")){
+    const key=el.dataset.text;if(typeof data[key]==="string")el.textContent=data[key];
   }
-  if(!updated.brand)updated.brand=defaults.brand;
-  if(!updated.offerName)updated.offerName=defaults.offerName;
-  if(!/^#[0-9a-fA-F]{6}$/.test(updated.accent))updated.accent=defaults.accent;
-  if(updated.videoUrl && !getVideoSource(updated.videoUrl)){
-    alert("Please provide a valid YouTube, Vimeo or direct MP4 URL.");return;
+  rich(".story h2",data.storyTitle,data.storyHighlight);
+  const paragraphs=document.querySelectorAll(".story-copy > p");
+  if(paragraphs[0])paragraphs[0].textContent=data.storyParagraph1||"";
+  if(paragraphs[1])paragraphs[1].textContent=data.storyParagraph2||"";
+  text(".shift strong",data.shiftText);
+  rich(".method h2",data.methodTitle,data.methodHighlight);
+  text(".method-heading > p",data.methodSubtitle);
+  renderSteps(data.steps);
+  rich(".offer-heading h2",data.offerHeading,data.offerHighlight);
+  text(".offer-heading > p",data.offerSubtitle);
+  renderOffer(data.offerItems);
+  rich(".trust h2",data.trustTitle,data.trustHighlight);
+  text(".trust-content > p",data.trustText);
+  rich(".closing-content h2",data.closingTitle+" "+data.closingLine2,data.closingHighlight);
+  renderFaqs(data.faqs);
+  text(".footer-top p",data.footerNote);
+  text(".price-block small",data.priceNote);
+  document.title=data.brand+" | "+data.headline1+" "+data.headline2;
+  by('meta[name="description"]').setAttribute("content",data.subtitle||"");
+  text("#videoStatus",getVideo(data.videoUrl)?"Watch the complete presentation above":"Presentation video will be available soon");
+  if(data.checkoutUrl && safeUrl(data.checkoutUrl)){
+    text("#offerSecurityNote","Continue to the secure checkout or booking destination.");
+    text(".closing-content > small","Have questions? Please contact us before making a decision.");
+  } else {
+    text("#offerSecurityNote","No online payment required to send an inquiry.");
   }
-  if(updated.checkoutUrl && !safeHttpUrl(updated.checkoutUrl)){
-    alert("Please provide a valid checkout URL beginning with https:// or http://.");return;
-  }
-  settings=updated;
-  try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{}
-  renderSettings();editorDialog.close();
-});
-document.getElementById("resetDemo").addEventListener("click",()=>{
-  settings={...defaults};
-  try{localStorage.removeItem(KEY);}catch{}
-  renderSettings();editorDialog.close();
-});
-document.getElementById("playVideo").addEventListener("click",()=>{
-  const source=getVideoSource(settings.videoUrl);
-  if(!source){openEditor();return;}
-  let player;
+}
+async function loadPublic(){
+  try{
+    const response=await fetch("/api/public",{cache:"no-store"});
+    if(!response.ok)throw Error("Could not load published page");
+    render(await response.json());
+  }catch(err){console.error(err);}
+}
+const playButton=by("#playVideo");
+playButton.addEventListener("click",()=>{
+  const source=getVideo(siteContent?.videoUrl);
+  if(!source){text("#videoStatus","The presentation video hasn't been published yet.");return;}
+  let node;
   if(source.type==="iframe"){
-    player=document.createElement("iframe");player.title="Video Sales Letter presentation";
-    player.src=source.url;player.referrerPolicy="strict-origin-when-cross-origin";
-    player.allow="autoplay; fullscreen; encrypted-media; picture-in-picture";player.allowFullscreen=true;
-  }else{
-    player=document.createElement("video");player.src=source.url;player.controls=true;
-    player.autoplay=true;player.playsInline=true;
+    node=document.createElement("iframe");node.title="Video sales presentation";
+    node.src=source.url;node.referrerPolicy="strict-origin-when-cross-origin";
+    node.allow="autoplay; fullscreen; picture-in-picture; encrypted-media";node.allowFullscreen=true;
+  } else {
+    node=document.createElement("video");node.src=source.url;node.controls=true;node.autoplay=true;node.playsInline=true;
   }
-  videoPlayer.replaceChildren(player);videoArt.hidden=true;videoPlayer.hidden=false;
+  const container=by("#videoPlayer");container.replaceChildren(node);container.hidden=false;by("#videoArt").hidden=true;
 });
-document.querySelectorAll("[data-buy]").forEach(node=>node.addEventListener("click",()=>{
-  const url=safeHttpUrl(settings.checkoutUrl);
-  if(url)window.open(url.href,"_blank","noopener,noreferrer");
-  else checkoutDialog.showModal();
+const leadDialog=by("#leadDialog");
+by("#closeLead").addEventListener("click",()=>leadDialog.close());
+document.querySelectorAll("[data-buy]").forEach(button=>button.addEventListener("click",()=>{
+  const url=safeUrl(siteContent?.checkoutUrl);
+  if(url)window.open(url.href,"_blank","noopener,noreferrer");else leadDialog.showModal();
 }));
-const menuToggle=document.getElementById("menuToggle");
-const mobileMenu=document.getElementById("mobileMenu");
+by("#leadForm").addEventListener("submit",async event=>{
+  event.preventDefault();const form=event.currentTarget;
+  const button=by("#submitLead"),message=by("#leadMessage");
+  const fd=new FormData(form);
+  const payload={name:String(fd.get("name")||""),email:String(fd.get("email")||""),message:String(fd.get("message")||""),website:String(fd.get("website")||""),consent:fd.get("consent")==="on"};
+  button.disabled=true;message.textContent="Sending your inquiry…";
+  try{
+    const result=await fetch("/api/leads",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const body=await result.json();
+    if(!result.ok)throw Error(body.error||"Please try again.");
+    message.textContent="Thanks! Your inquiry has been received.";message.className="success-text";form.reset();
+  }catch(err){message.textContent=err.message;message.className="error-text";}
+  finally{button.disabled=false;}
+});
+const menuToggle=by("#menuToggle"),mobileMenu=by("#mobileMenu");
 menuToggle.addEventListener("click",()=>{
   const open=mobileMenu.hidden;mobileMenu.hidden=!open;
   menuToggle.setAttribute("aria-expanded",String(open));
   menuToggle.setAttribute("aria-label",open?"Close navigation":"Open navigation");
   menuToggle.textContent=open?"×":"☰";
 });
-mobileMenu.querySelectorAll("a,button").forEach(el=>el.addEventListener("click",()=>{
-  mobileMenu.hidden=true;menuToggle.setAttribute("aria-expanded","false");
-  menuToggle.setAttribute("aria-label","Open navigation");menuToggle.textContent="☰";
+mobileMenu.querySelectorAll("a").forEach(link=>link.addEventListener("click",()=>{
+  mobileMenu.hidden=true;menuToggle.setAttribute("aria-expanded","false");menuToggle.textContent="☰";
 }));
 if("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-  const targets=[...document.querySelectorAll(".reveal")];
+  const target=[...document.querySelectorAll(".reveal")];
   const observer=new IntersectionObserver(entries=>entries.forEach(({target,isIntersecting})=>{
     if(isIntersecting){target.classList.add("visible");observer.unobserve(target);}
   }),{threshold:.06,rootMargin:"0px 0px 20px 0px"});
-  targets.forEach(node=>observer.observe(node));
-  document.body.classList.add("js-reveal");
+  target.forEach(t=>observer.observe(t));document.body.classList.add("js-reveal");
 }
-document.getElementById("copyrightYear").textContent=String(new Date().getFullYear());
-renderSettings();
+by("#copyrightYear").textContent=String(new Date().getFullYear());
+loadPublic();

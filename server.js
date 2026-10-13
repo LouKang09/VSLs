@@ -57,7 +57,7 @@ const defaults = {
   ],
   closingTitle:"That thing you've",closingLine2:"been thinking about?",closingHighlight:"Let's start there.",
   cta:"Get in touch",videoUrl:"",videos:[],checkoutUrl:"",supportEmail:"",
-  accent:"#db6042",footerNote:"A good place for great ideas."
+  accent:"#6477e6",footerNote:"A good place for great ideas."
 };
 
 function readJSON(file, fallback) {
@@ -101,6 +101,7 @@ const longFields = [
 ];
 function hydrateContent(input) {
   const result={...defaults,...(input||{})};
+  if(result.accent==="#db6042")result.accent="#6477e6"; // migrate v1 default color into new brand palette
   if(Array.isArray(input?.videos))result.videos=input.videos;
   else result.videos=input?.videoUrl?[{id:"legacy-primary",title:"The complete presentation",description:"Watch our introduction",category:"Presentation",url:input.videoUrl,poster:"",visible:true,featured:true}]:[];
   return result;
@@ -127,7 +128,7 @@ function validateContent(input) {
   }
   output.supportEmail=clean(input.supportEmail,254).toLowerCase();
   if(output.supportEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(output.supportEmail))throw Error("Invalid support email");
-  output.accent=/^#[0-9a-fA-F]{6}$/.test(input.accent)?input.accent:"#db6042";
+  output.accent=/^#[0-9a-fA-F]{6}$/.test(input.accent)?input.accent:"#6477e6";
   if(!output.brand || !output.headline1 || !output.offerName)throw Error("Brand, headline and offer name are required");
   if(!Array.isArray(input.steps)||input.steps.length!==4)throw Error("Exactly four steps required");
   output.steps=input.steps.map(s=>({title:clean(s?.title,120),description:clean(s?.description,350)}));
@@ -205,7 +206,7 @@ function originAllowed(req){
     return (actual.protocol==="https:"||actual.protocol==="http:") && actual.host===host;
   }catch{return false;}
 }
-function readBody(req,max=60000){
+function readBody(req,max=220000){
   return new Promise((resolve,reject)=>{
     let data="",length=0;
     req.on("data",chunk=>{length+=chunk.length;if(length>max){reject(new Error("Request too large"));req.destroy();return;}data+=chunk;});

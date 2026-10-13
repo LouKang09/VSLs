@@ -3,6 +3,8 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const {Transform} = require("node:stream");
+const {pipeline} = require("node:stream/promises");
 
 const root = __dirname;
 const dataDir = process.env.DATA_DIR || path.join(root, ".local-data");
@@ -14,6 +16,8 @@ if (process.env.NODE_ENV === "production" && (!sessionSecret || !setupToken)) {
   process.exit(1);
 }
 fs.mkdirSync(dataDir, {recursive: true});
+const mediaDir=path.join(dataDir,"media");
+fs.mkdirSync(mediaDir,{recursive:true});
 
 const files = {
   content:path.join(dataDir,"content.json"),
@@ -52,7 +56,7 @@ const defaults = {
     {question:"Are any specific results guaranteed?",answer:"No financial, business or other specific outcome is guaranteed. Results depend on your circumstances and effort."}
   ],
   closingTitle:"That thing you've",closingLine2:"been thinking about?",closingHighlight:"Let's start there.",
-  cta:"Get in touch",videoUrl:"",checkoutUrl:"",supportEmail:"",
+  cta:"Get in touch",videoUrl:"",videos:[],checkoutUrl:"",supportEmail:"",
   accent:"#db6042",footerNote:"A good place for great ideas."
 };
 
@@ -95,6 +99,23 @@ const longFields = [
   "subtitle","storyParagraph1","storyParagraph2","methodSubtitle",
   "offerSubtitle","offerDescription","trustText"
 ];
+function hydrateContent(input) {
+  const result={...defaults,...(input||{})};
+  if(Array.isArray(input?.videos))result.videos=input.videos;
+  else result.videos=input?.videoUrl?[{id:"legacy-primary",title:"The complete presentation",description:"Watch our introduction",category:"Presentation",url:input.videoUrl,poster:"",visible:true,featured:true}]:[];
+  return result;
+}
+function validVideoUrl(value) {
+  if(/^\/media\/[a-f0-9-]{36}\.(mp4|webm)$/i.test(value))return true;
+  if(!validUrl(value))return false;
+  const u=new URL(value);
+  const host=u.hostname.toLowerCase().replace(/^www\./,"");
+  return u.protocol==="https:"&&(host==="youtu.be"||["youtube.com","m.youtube.com","youtube-nocookie.com","vimeo.com","player.vimeo.com"].includes(host)||/\.(mp4|webm)$/i.test(u.pathname));
+}
+function validPosterUrl(value) {
+  return !value || /^\/media\/[a-f0-9-]{36}\.(png|jpg|webp)$/i.test(value) ||
+    (validUrl(value) && new URL(value).protocol==="https:");
+}
 function validateContent(input) {
   if(!input || typeof input!=="object" || Array.isArray(input))throw Error("Invalid content");
   const output={};
@@ -114,6 +135,24 @@ function validateContent(input) {
   output.offerItems=input.offerItems.map(s=>clean(s,200)).filter(Boolean);
   if(!Array.isArray(input.faqs)||input.faqs.length>12)throw Error("FAQs support up to 12 items");
   output.faqs=input.faqs.map(item=>({question:clean(item?.question,250),answer:clean(item?.answer,1500)})).filter(item=>item.question&&item.answer);
+  if(!Array.isArray(input.videos)||input.videos.length>36)throw Error("Video library supports up to 36 videos");
+  let featuredSeen=false;
+  const videoIds=new Set();
+  output.videos=input.videos.map((item,index)=>{
+    const id=clean(item?.id,70);
+    const title=clean(item?.title,140);
+    const url=clean(item?.url,1600);
+    const poster=clean(item?.poster,1600);
+    const visible=item?.visible===true;
+    const requestedFeatured=item?.featured===true && visible;
+    if(!/^[a-zA-Z0-9_-]{4,70}$/.test(id)||videoIds.has(id))throw Error("Video "+(index+1)+" has an invalid or duplicate ID");
+    videoIds.add(id);
+    if(!title||!url||!validVideoUrl(url))throw Error("Video "+(index+1)+" needs a title and a valid YouTube, Vimeo, MP4 or WebM URL");
+    if(!validPosterUrl(poster))throw Error("Video "+(index+1)+" has an invalid cover image URL");
+    const featured=requestedFeatured&&!featuredSeen;
+    if(featured)featuredSeen=true;
+    return {id,title,url,poster,description:clean(item?.description,600),category:clean(item?.category,60)||"Presentation",visible,featured};
+  });
   return output;
 }
 function clientIp(req){return String(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").split(",")[0].trim().slice(0,80);}
@@ -174,6 +213,68 @@ function readBody(req,max=60000){
     req.on("error",reject);
   });
 }
+const mediaMime={mp4:"video/mp4",webm:"video/webm",png:"image/png",jpg:"image/jpeg",webp:"image/webp"};
+async function uploadMedia(req,res){
+  const incoming=String(req.headers["content-type"]||"").split(";")[0].trim().toLowerCase();
+  const formats={"video/mp4":"mp4","video/webm":"webm","image/png":"png","image/jpeg":"jpg","image/webp":"webp"};
+  const ext=formats[incoming];
+  if(!ext)return fail(res,415,"Upload MP4, WebM, JPG, PNG or WebP files only");
+  const limit=ext==="mp4"||ext==="webm"?120*1024*1024:8*1024*1024;
+  const length=Number(req.headers["content-length"]||0);
+  if(length>limit)return fail(res,413,"File exceeds upload size limit");
+  const id=crypto.randomUUID(),filename=id+"."+ext,location=path.join(mediaDir,filename);
+  let count=0;
+  const limiter=new Transform({transform(chunk,encoding,callback){
+    count+=chunk.length;
+    if(count>limit)return callback(new Error("File too large"));
+    callback(null,chunk);
+  }});
+  try{
+    await pipeline(req,limiter,fs.createWriteStream(location,{flags:"wx",mode:0o600}));
+    if(count<12)throw Error("File is empty or invalid");
+    const fd=fs.openSync(location,"r"),buf=Buffer.alloc(16);
+    try{fs.readSync(fd,buf,0,16,0);}finally{fs.closeSync(fd);}
+    const valid={
+      mp4:buf.toString("ascii",4,8)==="ftyp",
+      webm:buf.subarray(0,4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3])),
+      png:buf.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])),
+      jpg:buf[0]===255&&buf[1]===216&&buf[2]===255,
+      webp:buf.toString("ascii",0,4)==="RIFF"&&buf.toString("ascii",8,12)==="WEBP"
+    }[ext];
+    if(!valid)throw Error("File content does not match selected format");
+    return json(res,201,{ok:true,url:"/media/"+filename,size:count});
+  }catch(err){
+    try{fs.unlinkSync(location);}catch{}
+    if(!res.headersSent)fail(res,err.message.includes("large")?413:400,err.message);
+  }
+}
+function serveMedia(req,res,pathname){
+  const filename=pathname.slice("/media/".length);
+  if(!/^[a-f0-9-]{36}\.(mp4|webm|png|jpg|webp)$/i.test(filename))return fail(res,404,"Not found");
+  const location=path.join(mediaDir,filename),extension=filename.split(".").pop().toLowerCase();
+  fs.stat(location,(err,info)=>{
+    if(err||!info.isFile())return fail(res,404,"Media not found");
+    const headers={"Content-Type":mediaMime[extension],"Cache-Control":"public, max-age=86400","Accept-Ranges":"bytes","X-Content-Type-Options":"nosniff"};
+    const range=String(req.headers.range||"");
+    if(range){
+      const match=range.match(/^bytes=(\d*)-(\d*)$/);
+      if(!match)return fail(res,416,"Invalid range");
+      let start=match[1]?Number(match[1]):0;
+      let end=match[2]?Number(match[2]):info.size-1;
+      if(!match[1]&&match[2]){start=Math.max(0,info.size-Number(match[2]));end=info.size-1;}
+      if(start> end||start>=info.size||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)){
+        res.writeHead(416,{"Content-Range":"bytes */"+info.size});return res.end();
+      }
+      end=Math.min(end,info.size-1);
+      res.writeHead(206,{...headers,"Content-Range":"bytes "+start+"-"+end+"/"+info.size,"Content-Length":end-start+1});
+      if(req.method==="HEAD")return res.end();
+      return fs.createReadStream(location,{start,end}).pipe(res);
+    }
+    res.writeHead(200,{...headers,"Content-Length":info.size});
+    if(req.method==="HEAD")return res.end();
+    fs.createReadStream(location).pipe(res);
+  });
+}
 const staticFiles={"/":"index.html","/index.html":"index.html","/styles.css":"styles.css","/script.js":"script.js","/admin":"admin.html","/admin.html":"admin.html","/admin.js":"admin.js","/admin.css":"admin.css","/favicon.svg":"favicon.svg","/robots.txt":"robots.txt","/privacy": "privacy.html","/privacy.html":"privacy.html"};
 const mimes={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".svg":"image/svg+xml",".txt":"text/plain; charset=utf-8"};
 function serveStatic(req,res,pathname){
@@ -205,14 +306,17 @@ function csvField(x){
 async function handleApi(req,res,pathname){
   if(req.method==="GET"&&pathname==="/api/public"){
     const content=readJSON(files.content,null);
-    return json(res,200,{...content.published,publishedAt:content.publishedAt});
+    return json(res,200,{...hydrateContent(content.published),videos:hydrateContent(content.published).videos.filter(v=>v.visible),publishedAt:content.publishedAt});
   }
   if(req.method==="GET"&&pathname==="/api/admin/status"){
     const admin=readJSON(files.admin,null);
     return json(res,200,{setupRequired:!admin,authenticated:verifySession(req),username:verifySession(req)?admin?.username:null});
   }
   if(pathname.startsWith("/api/admin/") && !["/api/admin/login","/api/admin/setup"].includes(pathname) && !verifySession(req))return fail(res,401,"Sign in to continue");
-  if(req.method==="GET"&&pathname==="/api/admin/content")return json(res,200,readJSON(files.content,null));
+  if(req.method==="GET"&&pathname==="/api/admin/content"){
+    const state=readJSON(files.content,null);
+    return json(res,200,{...state,draft:hydrateContent(state.draft),published:hydrateContent(state.published)});
+  }
   if(req.method==="GET"&&pathname==="/api/admin/leads"){
     const leads=readJSON(files.leads,[]);
     return json(res,200,{leads:leads.slice(-500).reverse(),count:leads.length});
@@ -225,6 +329,7 @@ async function handleApi(req,res,pathname){
   }
   if(req.method!=="POST")return fail(res,405,"Method not allowed");
   if(!originAllowed(req))return fail(res,403,"Origin check failed");
+  if(pathname==="/api/admin/media")return await uploadMedia(req,res);
   let body;
   try{body=await readBody(req);}catch(err){return fail(res,400,err.message);}
   if(pathname==="/api/admin/setup"){
@@ -305,6 +410,7 @@ const server=http.createServer(async(req,res)=>{
     try{return await handleApi(req,res,pathname);}catch(err){console.error("API error",pathname,err);return fail(res,500,"Internal server error");}
   }
   if(req.method!=="GET"&&req.method!=="HEAD")return fail(res,405,"Method not allowed");
+  if(pathname.startsWith("/media/"))return serveMedia(req,res,pathname);
   return serveStatic(req,res,pathname);
 });
 server.listen(port,"0.0.0.0",()=>console.log("VSLs ready on port "+port+" with "+dataDir));

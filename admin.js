@@ -1,7 +1,7 @@
 "use strict";
 const $ = selector=>document.querySelector(selector);
 const $$ = selector=>[...document.querySelectorAll(selector)];
-const state={content:null,leads:[],currentTab:"overview"};
+const state={content:null,leads:[],currentTab:"overview",editingVideo:-1,uploading:false};
 const fields=[
   "brand","eyebrow","headline1","headline2","subtitle","storyTitle","storyHighlight","storyParagraph1",
   "storyParagraph2","shiftText","methodTitle","methodHighlight","methodSubtitle","offerHeading",
@@ -11,7 +11,8 @@ const fields=[
 ];
 const titles={
   overview:["Overview","Your content, under control.","Edit your message and publish changes instantly to the buyer-facing website."],
-  hero:["Headline & story","Make a powerful first impression.","Lead with your promise, explain the problem and connect a persuasive sales video."],
+  hero:["Page content","Make a memorable first impression.","Lead with a clear message, tell your story and establish why your offer matters."],
+  videos:["Video library","Publish more than one video.","Upload videos or add a link, create a collection and choose what buyers can watch."],
   method:["How it works","Show buyers the way forward.","Turn your process into four clear steps customers can understand."],
   offer:["Offer & pricing","Give your offer a clear value.","Edit what's included, the price and your real checkout or booking destination."],
   faq:["FAQs & trust","Help buyers feel confident.","Answer questions accurately and reinforce your message."],
@@ -88,6 +89,8 @@ function fillContent(data){
   $("#faqEditors").replaceChildren();
   (data.faqs||[]).forEach(item=>addFaq(item.question,item.answer));
   $("#lastPublished").textContent=prettyDate(data.publishedAt);
+  if(!Array.isArray(state.content.videos))state.content.videos=[];
+  renderVideoList();
 }
 function collectContent(){
   const content={...state.content};
@@ -103,6 +106,173 @@ function collectContent(){
   })).filter(item=>item.question&&item.answer);
   return content;
 }
+
+const videoDialog=$("#videoEditorDialog"),videoForm=$("#videoForm");
+function publicVideoUrl(value) {
+  const u=String(value||"").trim();
+  if(/^\/media\/[a-f0-9-]{36}\.(mp4|webm)$/i.test(u))return true;
+  try {
+    const parsed=new URL(u);
+    if(parsed.protocol!=="https:")return false;
+    const h=parsed.hostname.toLowerCase().replace(/^www\./,"");
+    return ["youtube.com","m.youtube.com","youtube-nocookie.com","youtu.be","vimeo.com","player.vimeo.com"].includes(h)||/\.(mp4|webm)$/i.test(parsed.pathname);
+  }catch{return false;}
+}
+function setVideoStats(){
+  const videos=state.content?.videos||[],shown=videos.filter(v=>v.visible),featured=videos.find(v=>v.featured&&v.visible);
+  $("#countVideos").textContent=String(videos.length);
+  $("#countVisible").textContent=String(shown.length);
+  $("#countFeatured").textContent=featured?.title||"Auto-select first";
+  $("#videoCountSmall").textContent=String(videos.length);
+  $("#overviewVideos").textContent=shown.length+" ready to publish / "+videos.length+" total";
+}
+function renderVideoList(){
+  setVideoStats();
+  const parent=$("#videoList");parent.replaceChildren();
+  const videos=state.content?.videos||[];
+  $("#videoEmpty").hidden=videos.length>0;
+  videos.forEach((video,index)=>{
+    const card=document.createElement("article");card.className="managed-video";
+    const thumb=document.createElement("div");thumb.className="managed-thumb";
+    const url=String(video.url||"");
+    let poster=String(video.poster||"");
+    if(!poster){
+      try {
+        const parsed=new URL(url);
+        const h=parsed.hostname.replace(/^www\./,"");
+        let id=h==="youtu.be"?parsed.pathname.split("/")[1]:parsed.searchParams.get("v")||(parsed.pathname.match(/^\/(?:shorts|live|embed)\/([^/]+)/)||[])[1];
+        if(["youtube.com","m.youtube.com","youtube-nocookie.com","youtu.be"].includes(h)&&/^[\w-]{11}$/.test(id))poster="https://i.ytimg.com/vi/"+id+"/mqdefault.jpg";
+      }catch{}
+    }
+    if(poster&&(poster.startsWith("/media/")||/^https:\/\//i.test(poster))){
+      const img=document.createElement("img");img.src=poster;img.alt="";img.loading="lazy";img.onerror=()=>img.remove();thumb.append(img);
+    }
+    const play=document.createElement("span");play.textContent="▶";thumb.append(play);
+    const main=document.createElement("div");main.className="managed-main";
+    const badges=document.createElement("div");badges.className="managed-badges";
+    const status=document.createElement("span");status.className="managed-badge "+(video.visible?"enabled":"disabled");status.textContent=video.visible?"Set to publish":"Hidden from buyers";badges.append(status);
+    if(video.featured&&video.visible){const featured=document.createElement("span");featured.className="managed-badge featured";featured.textContent="★ Featured";badges.append(featured);}
+    const category=document.createElement("span");category.className="managed-category";category.textContent=video.category||"Presentation";badges.append(category);
+    const title=document.createElement("h3");title.textContent=video.title;
+    const desc=document.createElement("p");desc.textContent=video.description||"No description yet";
+    const urlText=document.createElement("small");urlText.className="managed-source";urlText.textContent=url.startsWith("/media/")?"Uploaded video · Railway storage":url.includes("youtu")?"YouTube video":url.includes("vimeo")?"Vimeo video":"Externally hosted video";
+    main.append(badges,title,desc,urlText);
+    const actions=document.createElement("div");actions.className="managed-actions";
+    const make=(label,action,style="")=>{
+      const btn=document.createElement("button");btn.type="button";btn.textContent=label;btn.className=style;
+      btn.addEventListener("click",action);actions.append(btn);return btn;
+    };
+    make("Edit",()=>openVideoEditor(index),"action-solid");
+    make(video.visible?"Hide":"Show",()=>{video.visible=!video.visible;if(!video.visible)video.featured=false;renderVideoList();});
+    make(video.featured&&video.visible?"★ Hero video":"Set featured",()=>{
+      state.content.videos.forEach(v=>v.featured=false);
+      video.featured=true;video.visible=true;renderVideoList();
+    });
+    make("↑",()=>moveVideo(index,-1),"small-action").disabled=index===0;
+    make("↓",()=>moveVideo(index,1),"small-action").disabled=index===videos.length-1;
+    make("Delete",()=>{
+      if(!confirm("Delete “"+video.title+"” from your video library? The change is applied to buyers only when you publish the site."))return;
+      state.content.videos.splice(index,1);renderVideoList();
+    },"danger-action");
+    const bottom=document.createElement("div");bottom.className="managed-footer";
+    const number=document.createElement("span");number.textContent="POSITION "+String(index+1).padStart(2,"0");
+    bottom.append(number,actions);card.append(thumb,main,bottom);parent.append(card);
+  });
+}
+function moveVideo(index,offset){
+  const list=state.content.videos,next=index+offset;
+  if(next<0||next>=list.length)return;
+  [list[index],list[next]]=[list[next],list[index]];
+  renderVideoList();
+}
+function openVideoEditor(index=-1){
+  if(state.content.videos.length>=36&&index===-1){flash("Maximum of 36 videos per website",true);return;}
+  state.editingVideo=index;videoForm.reset();$("#videoFormError").textContent="";
+  $("#uploadProgress").hidden=true;$("#videoFile").value="";$("#posterFile").value="";
+  const data=index>=0?state.content.videos[index]:{title:"",description:"",category:"Presentation",url:"",poster:"",visible:true,featured:state.content.videos.length===0};
+  for(const field of ["title","description","category","url","poster"])videoForm.elements.namedItem(field).value=data[field]||"";
+  videoForm.elements.namedItem("visible").checked=data.visible;
+  videoForm.elements.namedItem("featured").checked=data.featured;
+  $("#videoModalTitle").textContent=index>=0?"Edit video":"Add new video";
+  videoDialog.showModal();
+}
+function closeVideoEditor(){
+  if(state.uploading)return;
+  videoDialog.close();
+}
+function applyVideoEdits(event){
+  event.preventDefault();
+  if(state.uploading)return;
+  const f=videoForm.elements;
+  const video={
+    id:state.editingVideo>=0?state.content.videos[state.editingVideo].id:crypto.randomUUID(),
+    title:f.namedItem("title").value.trim(),
+    description:f.namedItem("description").value.trim(),
+    category:f.namedItem("category").value.trim()||"Presentation",
+    url:f.namedItem("url").value.trim(),
+    poster:f.namedItem("poster").value.trim(),
+    visible:f.namedItem("visible").checked,
+    featured:f.namedItem("featured").checked
+  };
+  if(!video.title||!publicVideoUrl(video.url)){
+    $("#videoFormError").textContent="Please add a title and a valid YouTube, Vimeo, MP4 or WebM video link.";
+    return;
+  }
+  if(video.poster&&!video.poster.startsWith("/media/")&&!/^https:\/\//i.test(video.poster)){
+    $("#videoFormError").textContent="Cover image must be an HTTPS URL or an uploaded image.";
+    return;
+  }
+  if(video.featured){video.visible=true;state.content.videos.forEach(v=>v.featured=false);}
+  if(state.editingVideo>=0)state.content.videos[state.editingVideo]=video;
+  else state.content.videos.push(video);
+  videoDialog.close();renderVideoList();flash("Video added to your working library. Click Save draft or Publish site to store your changes.");
+}
+function uploadToRailway(file,kind){
+  const accepted=kind==="video"?["video/mp4","video/webm"]:["image/png","image/jpeg","image/webp"];
+  const limit=kind==="video"?120*1024*1024:8*1024*1024;
+  if(!accepted.includes(file.type))return Promise.reject(Error("Unsupported file format. Select an MP4/WebM video or a JPG/PNG/WebP image."));
+  if(file.size>limit)return Promise.reject(Error("File exceeds "+(limit/1024/1024)+" MB limit."));
+  const progress=$("#uploadProgress"),message=$("#uploadProgressText"),bar=$("#uploadProgressBar");
+  progress.hidden=false;bar.style.width="0%";message.textContent="Uploading "+file.name+"…";
+  state.uploading=true;$("#saveVideo").disabled=true;
+  return new Promise((resolve,reject)=>{
+    const request=new XMLHttpRequest();
+    request.open("POST","/api/admin/media");
+    request.setRequestHeader("Content-Type",file.type);
+    request.upload.onprogress=event=>{
+      if(event.lengthComputable){const percent=Math.min(100,Math.round(event.loaded/event.total*100));bar.style.width=percent+"%";message.textContent="Uploading "+file.name+" · "+percent+"%";}
+    };
+    request.onload=()=>{
+      state.uploading=false;$("#saveVideo").disabled=false;
+      let result;try{result=JSON.parse(request.responseText);}catch{result={};}
+      if(request.status>=200&&request.status<300&&result.url){
+        message.textContent="Upload complete ✓ "+file.name;bar.style.width="100%";resolve(result.url);
+      }else{message.textContent="Upload failed";reject(Error(result.error||"Upload failed. Please retry."));}
+    };
+    request.onerror=()=>{state.uploading=false;$("#saveVideo").disabled=false;reject(Error("Network connection failed during upload"));};
+    request.send(file);
+  });
+}
+async function uploadSelected(event,kind){
+  const file=event.target.files?.[0];if(!file)return;
+  if(state.uploading)return;
+  try{
+    const url=await uploadToRailway(file,kind);
+    if(kind==="video")$("#videoSourceUrl").value=url;
+    else $("#posterSourceUrl").value=url;
+    $("#videoFormError").textContent="";
+  }catch(error){$("#videoFormError").textContent=error.message;}
+  finally{event.target.value="";}
+}
+$("#addVideo").addEventListener("click",()=>openVideoEditor());
+$("#emptyAddVideo").addEventListener("click",()=>openVideoEditor());
+$("#closeVideoEditor").addEventListener("click",closeVideoEditor);
+$("#cancelVideoEditor").addEventListener("click",closeVideoEditor);
+videoForm.addEventListener("submit",applyVideoEdits);
+$("#videoFile").addEventListener("change",event=>uploadSelected(event,"video"));
+$("#posterFile").addEventListener("change",event=>uploadSelected(event,"poster"));
+videoForm.elements.namedItem("featured").addEventListener("change",e=>{if(e.target.checked)videoForm.elements.namedItem("visible").checked=true;});
+
 async function refreshLeads(){
   try{
     const data=await request("/api/admin/leads");

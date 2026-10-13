@@ -112,13 +112,22 @@ async function refreshLeads(){
     $("#leadsBadge").textContent=String(data.count)+" inquiries";
     const tbody=$("#leadsRows");tbody.replaceChildren();
     if(!data.leads.length){
-      const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=4;td.textContent="No inquiries yet. Buyer messages will appear here.";tr.append(td);tbody.append(tr);return;
+      const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.textContent="No inquiries yet. Buyer messages will appear here.";tr.append(td);tbody.append(tr);return;
     }
     for(const row of data.leads){
       const tr=document.createElement("tr");
       for(const value of [prettyDate(row.at),row.name||"—",row.email,row.message||"—"]){
         const td=document.createElement("td");td.textContent=value;tr.append(td);
-      }tbody.append(tr);
+      }
+      const action=document.createElement("td");
+      const deleteButton=document.createElement("button");
+      deleteButton.type="button";deleteButton.className="lead-delete";deleteButton.textContent="Delete";
+      if(!row.id){deleteButton.disabled=true;deleteButton.title="Older inquiry has no deletion ID";}else deleteButton.addEventListener("click",async()=>{
+        if(!confirm("Permanently delete this inquiry?"))return;
+        try{await request("/api/admin/leads/delete",{method:"POST",body:JSON.stringify({id:row.id})});await refreshLeads();}
+        catch(err){flash("Delete failed: "+err.message,true);}
+      });
+      action.append(deleteButton);tr.append(action);tbody.append(tr);
     }
   }catch(err){flash("Unable to load inquiries: "+err.message,true);}
 }

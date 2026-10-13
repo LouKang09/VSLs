@@ -47,7 +47,8 @@ test("VSL CMS protects drafts, publishes selected videos, and persists uploads",
   const content=data.draft;
   content.videos=[
     {id:"video-first",title:"Product introduction",description:"A first video",category:"Introduction",url:"https://youtu.be/dQw4w9WgXcQ",poster:"",visible:true,featured:true},
-    {id:"video-second",title:"More details",description:"A hidden video",category:"Deep dive",url:"https://vimeo.com/12345678",poster:"",visible:false,featured:false}
+    {id:"video-second",title:"More details",description:"A second published video",category:"Deep dive",url:"https://vimeo.com/12345678",poster:"",visible:true,featured:false},
+    {id:"video-third",title:"Private launch preview",description:"A draft-only video",category:"Drafts",url:"https://youtu.be/dQw4w9WgXcQ",poster:"",visible:false,featured:false}
   ];
   const saved=await post("/api/admin/draft",{content},cookie);
   assert.equal(saved.status,200,JSON.stringify(saved.data));
@@ -55,14 +56,23 @@ test("VSL CMS protects drafts, publishes selected videos, and persists uploads",
   const publish=await post("/api/admin/publish",{content},cookie);
   assert.equal(publish.status,200,JSON.stringify(publish.data));
   const publicAfter=(await api("/api/public")).data;
-  assert.equal(publicAfter.videos.length,1,"Only visible videos should be publicly published");
+  assert.equal(publicAfter.videos.length,2,"Multiple visible videos must be published, while hidden videos stay private");
   assert.equal(publicAfter.videos[0].title,"Product introduction");
   const adminContent=(await api("/api/admin/content",{headers:{"Cookie":cookie}})).data;
-  assert.equal(adminContent.draft.videos.length,2,"Admin must retain hidden video");
+  assert.equal(adminContent.draft.videos.length,3,"Admin must retain visible and hidden videos");
   const png=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/fXsAAAAASUVORK5CYII=","base64");
   const upload=await api("/api/admin/media",{method:"POST",headers:{"Origin":origin,"Cookie":cookie,"Content-Type":"image/png"},body:png});
   assert.equal(upload.status,201,JSON.stringify(upload.data));
   assert.match(upload.data.url,/^\/media\/[a-f0-9-]{36}\.png$/);
+  // Verify uploaded MP4 bytes and HTTP range streaming, not only image covers.
+  const mp4=Buffer.from([0,0,0,24,102,116,121,112,105,115,111,109,0,0,2,0,105,115,111,109,109,112,52,50]);
+  const videoUpload=await api("/api/admin/media",{method:"POST",headers:{"Origin":origin,"Cookie":cookie,"Content-Type":"video/mp4"},body:mp4});
+  assert.equal(videoUpload.status,201,JSON.stringify(videoUpload.data));
+  assert.match(videoUpload.data.url,/^\/media\/[a-f0-9-]{36}\.mp4$/);
+  const videoResponse=await fetch(origin+videoUpload.data.url,{headers:{Range:"bytes=4-11"}});
+  assert.equal(videoResponse.status,206);
+  assert.equal(videoResponse.headers.get("content-type"),"video/mp4");
+  assert.equal(Buffer.from(await videoResponse.arrayBuffer()).toString("ascii"),"ftypisom");
   const media=await fetch(origin+upload.data.url);
   assert.equal(media.status,200);
   assert.equal(media.headers.get("content-type"),"image/png");

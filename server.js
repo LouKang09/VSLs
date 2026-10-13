@@ -102,7 +102,7 @@ function validateContent(input) {
   for(const key of longFields)output[key]=clean(input[key],800);
   for(const key of ["videoUrl","checkoutUrl"]) {
     output[key]=clean(input[key],1500);
-    if(!validUrl(output[key]))throw Error("Invalid "+key+" URL. Use https://");
+    if(!validUrl(output[key]) || (key==="checkoutUrl" && output[key] && !output[key].startsWith("https://")))throw Error("Invalid "+key+" URL. Use https://");
   }
   output.supportEmail=clean(input.supportEmail,254).toLowerCase();
   if(output.supportEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(output.supportEmail))throw Error("Invalid support email");
@@ -197,7 +197,11 @@ function serveStatic(req,res,pathname){
     res.end(req.method==="HEAD"?undefined:content);
   });
 }
-function csvField(x){return '"'+String(x??"").replace(/"/g,'""')+'"';}
+function csvField(x){
+  let value=String(x??"");
+  if(/^[=+@\-\t\r]/.test(value))value="'"+value;
+  return '"'+value.replace(/"/g,'""')+'"';
+}
 async function handleApi(req,res,pathname){
   if(req.method==="GET"&&pathname==="/api/public"){
     const content=readJSON(files.content,null);

@@ -45,7 +45,7 @@
     <div class="sidebar-bottom"><div class="sidebar-user"><span class="avatar">A</span><span><strong id="loggedUser">Administrator</strong><small>Site administrator</small></span></div><button id="logoutButton" class="sidebar-logout">Log out ↗</button></div>
   </aside>
   <div class="main-area">
-    <header class="admin-topbar"><div class="crumb">VSLs <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="top-status"><i></i> Public site online</span><a href="/" target="_blank" rel="noopener" class="preview-link">View buyer website ↗</a></div></header>
+    <header class="admin-topbar"><div class="crumb">VSLs <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="top-status"><i></i> Public site online</span><a href="/?preview=draft" target="_blank" rel="noopener" class="preview-link">Preview saved draft ↗</a><a href="/" target="_blank" rel="noopener" class="preview-link">Buyer site ↗</a></div></header>
     <main class="dashboard-content">
       <div class="page-heading"><div><p class="overline">YOUR SALES PAGE</p><h1 id="panelTitle">Your content, under control.</h1><p id="panelSubtitle">Edit your message and publish changes instantly to the buyer-facing website.</p></div><div class="heading-actions" id="publishActions"><button type="button" id="saveDraft" class="secondary-button">Save draft</button><button type="button" id="publishNow" class="primary-button">Publish changes <span>↗</span></button></div></div>
       <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
@@ -91,7 +91,7 @@
       </section>
 
       <section class="panel" data-panel="leads" hidden>
-        <div class="editor-card"><div class="card-heading"><div><p class="overline">CUSTOMER CONTACTS</p><h2>Buyer inquiries <span id="leadsBadge" class="section-pill">0</span></h2></div><a href="/api/admin/leads.csv" class="secondary-button">Export CSV ↓</a></div><p class="muted-note">When a buyer uses the inquiry form, their message appears here. Contact them using the provided email address only for their inquiry.</p><div class="leads-table-wrapper"><table class="leads-table"><thead><tr><th>DATE</th><th>NAME</th><th>EMAIL</th><th>MESSAGE</th></tr></thead><tbody id="leadsRows"><tr><td colspan="4">No inquiries yet.</td></tr></tbody></table></div></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">CUSTOMER CONTACTS</p><h2>Buyer inquiries <span id="leadsBadge" class="section-pill">0</span></h2></div><a href="/api/admin/leads.csv" class="secondary-button">Export CSV ↓</a></div><p class="muted-note">When a buyer uses the inquiry form, their message appears here. Contact them using the provided email address only for their inquiry.</p><div class="leads-table-wrapper"><table class="leads-table"><thead><tr><th>DATE</th><th>NAME</th><th>EMAIL</th><th>MESSAGE</th><th>ACTION</th></tr></thead><tbody id="leadsRows"><tr><td colspan="5">No inquiries yet.</td></tr></tbody></table></div></div>
       </section>
 
       <section class="panel" data-panel="settings" hidden>

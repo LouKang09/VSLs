@@ -321,7 +321,8 @@ function serveStatic(req,res,pathname){
       content=Buffer.from(output,"utf8");
     }
     const isHtml=name.endsWith(".html");
-    res.writeHead(200,{"Content-Type":mimes[path.extname(name)]||"application/octet-stream","Cache-Control":isHtml?"no-store":"public,max-age=120","X-Content-Type-Options":"nosniff"});
+    res.writeHead(200,{"Content-Type":mimes[path.extname(name)]||"application/octet-stream","Cache-Control":isHtml?"no-store":"public,max-age=120",
+      "Referrer-Policy":name==="checkout.html"?"no-referrer":"strict-origin-when-cross-origin","X-Content-Type-Options":"nosniff"});
     res.end(req.method==="HEAD"?undefined:content);
   });
 }
@@ -351,7 +352,7 @@ function publishedCheckout(){
   };
 }
 function publicOrder(o) {
-  return {ref:o.ref,createdAt:o.createdAt,customerName:o.customerName,email:o.email,product:o.product,
+  return {ref:o.ref,createdAt:o.createdAt,customerName:o.customerName,email:o.email,product:o.product,paymentDetails:o.paymentDetails||null,
     amountCents:o.amountCents,currency:o.currency,method:o.method,paymentStatus:o.paymentStatus,
     fulfillmentStatus:o.fulfillmentStatus,paymentReference:o.paymentReference||"",updatedAt:o.updatedAt};
 }
@@ -361,7 +362,15 @@ function validOrderAccess(ref,key,o){
   return tokenEqual(digest,o.keyHash);
 }
 async function handleApi(req,res,pathname){
-  if(req.method==="GET"&&pathname==="/api/checkout/config")return json(res,200,publishedCheckout());
+  if(req.method==="GET"&&pathname==="/api/checkout/config"){
+    const c=publishedCheckout();
+    if(!c.enabled){c.gcash={name:"",number:""};c.bank={bank:"",name:"",number:""};}
+    else{
+      if(!c.options.gcash)c.gcash={name:"",number:""};
+      if(!c.options.bank)c.bank={bank:"",name:"",number:""};
+    }
+    return json(res,200,c);
+  }
   if(req.method==="GET"&&pathname==="/api/orders/status"){
     if(throttle("order-read:"+clientIp(req),90,15*60*1000))return fail(res,429,"Too many lookups");
     const query=new URL(req.url,"http://localhost").searchParams;
@@ -372,7 +381,10 @@ async function handleApi(req,res,pathname){
   }
   if(req.method==="GET"&&pathname==="/api/public"){
     const content=readJSON(files.content,null);
-    return json(res,200,{...hydrateContent(content.published),videos:hydrateContent(content.published).videos.filter(v=>v.visible),publishedAt:content.publishedAt});
+    const p=hydrateContent(content.published);
+    const {checkoutGcashName,checkoutGcashNumber,checkoutBankName,checkoutBankAccountName,checkoutBankAccountNumber,...safe}=p;
+    return json(res,200,{...safe,videos:p.videos.filter(v=>v.visible),publishedAt:content.publishedAt});
+  
   }
   if(req.method==="GET"&&pathname==="/api/admin/status"){
     const admin=readJSON(files.admin,null);
@@ -444,7 +456,8 @@ async function handleApi(req,res,pathname){
     if(readJSON(files.orders,[]).length>=50000)return fail(res,503,"Order capacity reached");
     const key=crypto.randomBytes(24).toString("base64url"),now=new Date().toISOString(),ref="VSL-"+crypto.randomBytes(5).toString("hex").toUpperCase();
     const order={ref,keyHash:crypto.createHash("sha256").update(key).digest("hex"),createdAt:now,updatedAt:now,customerName:name,email,phone,notes,
-      product:c.product,amountCents:c.amountCents,currency:c.currency,method,paymentStatus:"unpaid",fulfillmentStatus:"new",paymentReference:""};
+      product:c.product,amountCents:c.amountCents,currency:c.currency,method,paymentStatus:"unpaid",fulfillmentStatus:"new",paymentReference:"",
+      paymentDetails:{instructions:c.instructions,method,account:method==="gcash"?c.gcash:method==="bank"?c.bank:null}};
     const list=readJSON(files.orders,[]);list.push(order);atomicWrite(files.orders,list);
     return json(res,201,{ok:true,ref,key,order:publicOrder(order)});
   }

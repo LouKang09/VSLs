@@ -181,8 +181,19 @@ function serveStatic(req,res,pathname){
   if(!name)return fail(res,404,"Not found");
   fs.readFile(path.join(root,name),(err,content)=>{
     if(err)return fail(res,404,"Not found");
-    const adminPage=pathname.startsWith("/admin");
-    res.writeHead(200,{"Content-Type":mimes[path.extname(name)]||"application/octet-stream","Cache-Control":adminPage?"no-store":"public,max-age=120","X-Content-Type-Options":"nosniff"});
+    if(name==="index.html"){
+      const published=readJSON(files.content,null).published;
+      const escaped=value=>String(value||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+      const title=escaped(published.brand+" | "+published.headline1+" "+published.headline2);
+      const desc=escaped(published.subtitle);
+      let output=content.toString("utf8").replace(/<title>[\s\S]*?<\/title>/,"<title>"+title+"</title>");
+      output=output.replace(/(<meta name="description" content=")[^"]*(">)/,(_,a,b)=>a+desc+b);
+      output=output.replace(/(<meta property="og:title" content=")[^"]*(">)/,(_,a,b)=>a+title+b);
+      output=output.replace(/(<meta property="og:description" content=")[^"]*(">)/,(_,a,b)=>a+desc+b);
+      content=Buffer.from(output,"utf8");
+    }
+    const isHtml=name.endsWith(".html");
+    res.writeHead(200,{"Content-Type":mimes[path.extname(name)]||"application/octet-stream","Cache-Control":isHtml?"no-store":"public,max-age=120","X-Content-Type-Options":"nosniff"});
     res.end(req.method==="HEAD"?undefined:content);
   });
 }

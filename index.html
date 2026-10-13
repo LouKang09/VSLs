@@ -1,147 +1,125 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#f7f5ee">
-  <meta name="description" content="Discover a clearer way to turn your best idea into a product people can use. ">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="GOODFORM — Make your next idea happen">
-  <meta property="og:description" content="A new way to turn your idea into something real.">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/script.js" defer></script>
-  <title>GOODFORM | A New Way to Begin</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11141b">
+<meta name="description" content="A straightforward way to turn your next idea into something real.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VSLs — Make what matters"><meta property="og:description" content="A closer look at what you can create.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css"><script src="/script.js" defer></script>
+<title>VSLs — Make what matters</title>
 </head>
 <body>
-<div class="site" id="top">
-  <header class="site-header">
-    <div class="header-inner">
-      <a class="brand" href="#top" aria-label="Back to top"><span class="brand-icon"><span>⌁</span></span><span class="brand-name" data-text="brand">GOODFORM</span><sup>®</sup></a>
-      <nav aria-label="Primary navigation" class="desktop-nav"><a href="#story">The story</a><a href="#method">The method</a><a href="#offer">What's inside</a><a href="#faq">FAQs</a></nav>
-      <div class="header-actions"><a class="nav-cta" href="#offer">Explore the offer <span>↗</span></a></div>
-      <button type="button" class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-controls="mobileMenu" aria-expanded="false">☰</button>
+<div id="site">
+<header class="global-nav" id="top">
+ <div class="nav-inner frame">
+  <a class="wordmark" href="#top"><span class="brand-symbol"><span></span><span></span><span></span></span><span data-text="brand">GOODFORM</span><span class="brand-dot">.</span></a>
+  <nav id="mainNav" class="nav-links" aria-label="Site navigation">
+   <a href="#about">About</a><a href="#watch">Videos</a><a href="#process">How it works</a><a href="#offer">The offer</a><a href="#faq">FAQ</a>
+  </nav>
+  <a href="#offer" class="nav-action">Explore the offer <span aria-hidden="true">↗</span></a>
+  <button class="menu-button" id="menuButton" aria-label="Open menu" aria-expanded="false" aria-controls="mainNav"><span></span><span></span><span></span></button>
+ </div>
+</header>
+<main>
+ <section class="hero">
+  <div class="frame hero-grid">
+   <div class="hero-main">
+     <div class="hero-topline"><span class="signal"></span><span data-text="eyebrow">THE CREATOR LAUNCH SYSTEM</span></div>
+     <h1><span data-text="headline1">The idea is there.</span> <span class="gradient-text" data-text="headline2">Now make it happen.</span></h1>
+     <p class="hero-subtitle" data-text="subtitle">A thoughtful, step-by-step way to turn what you know into a digital product worth sharing. Less second-guessing. More meaningful progress.</p>
+     <div class="hero-actions"><a href="#watch" class="button button-lime">Watch the presentations <span aria-hidden="true">↗</span></a><a href="#offer" class="button button-ghost">Explore what's inside <span aria-hidden="true">→</span></a></div>
+     <div class="hero-foot"><div class="foot-line"></div><span>MADE FOR THE NEXT STEP</span><span class="foot-divider"></span><span id="videoStat">WATCH • LEARN • DECIDE</span></div>
+   </div>
+   <div class="hero-visual" aria-label="Featured video presentation">
+    <div class="visual-top"><span><span class="live-dot"></span> VIDEO PRESENTATION</span><span id="heroVideoCount">01 / 01</span></div>
+    <div class="video-showcase">
+      <div class="showcase-noise"></div><div class="showcase-shapes"><div class="ellipse ellipse-a"></div><div class="ellipse ellipse-b"></div><div class="ellipse ellipse-c"></div></div>
+      <img id="heroVideoPoster" class="showcase-poster" alt="" hidden>
+      <div class="showcase-copy" id="showcaseCopy"><span>THE STORY BEHIND</span><strong>It starts<br>with an idea<span>.</span></strong></div>
+      <button type="button" class="big-play" id="heroPlay" aria-label="Play featured sales video"><span>▶</span></button>
+      <div class="showcase-lower"><span>PRESS PLAY TO DISCOVER MORE</span><span class="sound-waves">▂▆▃▇▅▂</span></div>
     </div>
-    <nav id="mobileMenu" class="mobile-nav" aria-label="Mobile navigation" hidden><a href="#story">The story</a><a href="#method">The method</a><a href="#offer">What's inside</a><a href="#faq">FAQs</a></nav>
-  </header>
-
-  <main>
-    <section class="hero" aria-labelledby="hero-title">
-      <p class="hero-side">GOOD IDEAS DESERVE TO GO FURTHER —</p>
-      <div class="hero-center">
-        <p class="eyebrow hero-eyebrow"><span class="orange-line"></span> ✳ <span data-text="eyebrow">THE NEXT STEP</span></p>
-        <h1 id="hero-title"><span data-text="headline1">The idea is there.</span><br><em data-text="headline2">Now make it happen.</em></h1>
-        <p class="hero-copy" data-text="subtitle">A thoughtful, step-by-step way to turn what you know into a digital product worth sharing. Less second-guessing. More meaningful progress.</p>
-        <div class="hero-buttons"><a class="btn btn-accent" href="#watch"><span class="btn-play">▶</span> Watch the story <span class="btn-arrow">→</span></a><a class="inline-arrow" href="#offer">See what's included <span>↓</span></a></div>
-      </div>
-      <p class="hero-caption"><span>✳</span> A clear place to start.<br> &nbsp;&nbsp;&nbsp;An even clearer next step.</p>
-      <span class="hero-page">01 / 04</span>
-    </section>
-
-    <section class="video-section" id="watch" aria-labelledby="video-section-title">
-      <div class="film-labels"><span><i class="film-dot"></i> <span id="video-section-title">THE SHORT VERSION</span></span><span>YOUR BIG IDEA, EXPLAINED</span></div>
-      <div class="video-frame" id="videoFrame">
-        <div class="video-art" id="videoArt">
-          <div class="film-top"><span>✳ <span data-text="brand">GOODFORM</span> <b>●</b> THE FILM</span><span>PRESENTATION / 001</span></div>
-          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
-          <div class="film-title"><span>It starts</span><span>with <em>one idea.</em></span><small>A BETTER WAY TO BEGIN</small></div>
-          <button type="button" class="play-button" id="playVideo" aria-label="Play the video or add a video link"><span>▶</span></button>
-          <div class="film-bottom"><span>01 — YOUR STORY STARTS HERE</span><span>↗ ↘</span></div>
-        </div>
-        <div id="videoPlayer" class="video-player" hidden></div>
-      </div>
-      <div class="video-meta"><p><span class="tiny-star">✳</span> Add your own VSL from YouTube, Vimeo or a direct MP4 URL.</p><span id="videoStatus">Video presentation coming soon</span></div>
-    </section>
-
-    <section class="story section-container reveal" id="story">
-      <p class="section-overline">01 / THE REAL PROBLEM</p>
-      <div class="story-columns">
-        <h2>Good ideas have a way of <em>getting stuck.</em></h2>
-        <div class="story-copy"><p>Another open tab. Another saved tutorial. Another week spent wondering if your idea is ready.</p><p>The hardest part isn't always finding an idea. It's knowing what to do with it next.</p>
-          <div class="shift"><span>THE SHIFT</span><strong>You don't need a hundred more ideas.<br>You need a clear path for <em>one.</em></strong><b>↗</b></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="method reveal" id="method">
-      <div class="section-container">
-        <div class="method-top"><p class="section-overline">02 / A SIMPLER WAY FORWARD</p><span>FROM “SOMEDAY” TO “HERE IT IS.”</span></div>
-        <div class="method-heading"><h2>A little structure.<br><em>A lot more clarity.</em></h2><p>Four grounded steps to move from overthinking to something real. No shortcuts. Just a thoughtful way to make progress.</p></div>
-        <div class="step-grid">
-          <article class="step-card"><div class="step-top"><span>01</span><span>✳</span></div><h3>Find your focus.</h3><p>Choose the idea and the audience you can genuinely serve.</p><span class="card-arrow">↗</span></article>
-          <article class="step-card"><div class="step-top"><span>02</span><span>✧</span></div><h3>Shape the offer.</h3><p>Turn what you know into a useful, clearly defined product.</p><span class="card-arrow">↗</span></article>
-          <article class="step-card"><div class="step-top"><span>03</span><span>↗</span></div><h3>Put it out there.</h3><p>Build a simple launch plan and share your work with confidence.</p><span class="card-arrow">↗</span></article>
-          <article class="step-card"><div class="step-top"><span>04</span><span>✦</span></div><h3>Keep getting better.</h3><p>Listen, learn, refine, and take the next small step forward.</p><span class="card-arrow">↗</span></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="quote-break reveal"><span class="quote-star">✳</span><div><span>THE POINT ISN'T PERFECTION.</span><h2>Make the thing.<br><em>Then make it better.</em></h2></div><span class="quote-side">A NEW CHAPTER IS WAITING ↗</span></section>
-
-    <section class="offer section-container reveal" id="offer">
-      <p class="section-overline">03 / YOUR NEXT STEP</p>
-      <div class="offer-heading"><h2>Everything you need<br>to <em>get moving.</em></h2><p>Less piecing things together from twenty different places. More room to focus on the work that matters.</p></div>
-      <div class="offer-card">
-        <div class="book-panel">
-          <div class="book-ring"></div>
-          <div class="book-shadow"></div>
-          <div class="book-cover"><span class="cover-star">✳</span><strong>IDEA →<br><em>ACTION.</em></strong><small><span data-text="brand">GOODFORM</span> / EDITION 01</small></div>
-          <div class="book-tag">THE RIGHT FIRST STEP <span>↗</span></div>
-        </div>
-        <div class="offer-details">
-          <div class="offer-top"><span class="label-chip">WHAT YOU GET</span><span>THE OFFER</span></div>
-          <h3 data-text="offerName">The Creator Launch System</h3>
-          <p class="offer-intro" data-text="offerDescription">A practical digital playbook for turning one good idea into a real, ready-to-share offer.</p>
-          <h4>WHAT'S INSIDE</h4>
-          <ul class="offer-includes"><li><span>✓</span> A straightforward step-by-step roadmap</li><li><span>✓</span> Practical planning worksheets</li><li><span>✓</span> Useful templates to get started</li><li><span>✓</span> A simple launch preparation checklist</li></ul>
-          <div class="price-block"><div><span>PRICE INFORMATION</span><strong data-text="price">Contact for pricing</strong></div><small data-text="priceNote">Flexible options</small></div>
-          <button class="btn offer-purchase" type="button" data-buy><span data-text="cta">Get in touch</span><span>↗</span></button>
-          <p class="security-note" id="offerSecurityNote">Questions about the offer? Get in touch.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="trust section-container reveal">
-      <div><p class="section-overline">A NOTE ABOUT TRUST</p><h2>Real stories<br><em>matter more.</em></h2></div>
-      <div class="trust-content"><span class="large-quote">“</span><p>Explore the details at your own pace. A confident next step begins with clear information and a genuine fit.</p><div class="trust-foot">✳ No exaggerated promises. Make an informed decision based on the actual offer.</div></div>
-    </section>
-
-    <section class="faq section-container" id="faq">
-      <div class="faq-heading"><p class="section-overline">04 / GOOD TO KNOW</p><h2>A few things<br><em>worth knowing.</em></h2><p>Clear answers help people make confident decisions.</p></div>
-      <div class="faq-list">
-        <details><summary><span>01</span> Is this right for me if I'm starting from zero? <i>+</i></summary><p>We welcome questions from people exploring the offer. Contact us if you want help deciding whether it is right for you.</p></details>
-        <details><summary><span>02</span> What will I receive after purchasing? <i>+</i></summary><p>The included materials and features are described above. If you need more detail, please contact us before proceeding.</p></details>
-        <details><summary><span>03</span> Is this a course or a physical product? <i>+</i></summary><p>Please check the offer description above for the delivery method and full details.</p></details>
-        <details><summary><span>04</span> Do you guarantee results? <i>+</i></summary><p>No specific earnings or sales outcome is promised. Results depend on the offer, market, individual circumstances, and execution.</p></details>
-        <details><summary><span>05</span> How can I contact you before purchasing? <i>+</i></summary><p>Use the contact form to send a message. We'll follow up at the email address you provide.</p></details>
-      </div>
-    </section>
-
-    <section class="closing"><div class="closing-circles"></div><div class="closing-content"><p>✳ &nbsp; ONE GOOD STEP CAN CHANGE THE STORY.</p><h2>That thing you've<br>been thinking about?<br><em>Let's start there.</em></h2><button class="btn closing-button" type="button" data-buy><span data-text="cta">Get in touch</span><span>↗</span></button><small>Have questions? We would love to hear from you.</small></div></section>
-  </main>
-  <footer><div class="footer-top"><div><a class="brand" href="#top"><span class="brand-icon"><span>⌁</span></span><span class="brand-name" data-text="brand">GOODFORM</span><sup>®</sup></a><p>A good place for great ideas.</p></div><div class="footer-links"><a href="#top">Back to top ↑</a><a href="/privacy">Privacy notice</a><a href="#faq">Frequently asked questions</a></div></div><div class="footer-bottom">© <span id="copyrightYear"></span> <span data-text="brand">GOODFORM</span> · All rights reserved.</div></footer>
-</div>
-<div class="mobile-bar"><div><small>YOUR NEXT STEP</small><strong data-text="price">Contact for pricing</strong></div><a class="btn mobile-cta" href="#offer">See offer ↗</a></div>
-
-
-<dialog id="leadDialog" class="checkout-modal" aria-labelledby="leadTitle">
-  <div class="checkout-shell"><button type="button" class="close-modal" id="closeLead" aria-label="Close contact form">×</button>
-    <div class="checkout-icon">✉</div><h2 id="leadTitle">Let’s talk about your next step.</h2>
-    <p>Leave your details and we’ll be able to follow up about this offer.</p>
-    <form id="leadForm">
-      <label class="lead-label">Name (optional)<input name="name" maxlength="120" autocomplete="name" placeholder="Your name"></label>
-      <label class="lead-label">Email address<input name="email" type="email" maxlength="254" autocomplete="email" required placeholder="you@example.com"></label>
-      <label class="lead-label">Message (optional)<textarea name="message" rows="3" maxlength="1200" placeholder="What would you like to know?"></textarea></label>
-      <label class="lead-consent"><input name="consent" type="checkbox" required> I agree to share my details so I can be contacted about my inquiry.</label>
-      <input name="website" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <p id="leadMessage" role="status" aria-live="polite"></p>
-      <button type="submit" class="btn btn-accent" id="submitLead">Send message ↗</button>
-    </form>
-    <p class="lead-privacy">Your details are used to reply to your inquiry and are not shown publicly. <a href="/privacy" target="_blank" rel="noopener">Privacy notice ↗</a></p>
+    <div class="visual-caption"><span class="badge-live" id="heroVideoBadge">INTRODUCTION</span><div><strong id="heroVideoTitle">Discover the big picture</strong><small id="heroVideoDescription">A presentation to help you get started.</small></div><span class="visual-caption-arrow">↗</span></div>
+   </div>
   </div>
+  <div class="hero-bottom frame"><span>01 / THE INTRODUCTION</span><a href="#watch">SCROLL TO EXPLORE <span aria-hidden="true">↓</span></a></div>
+ </section>
+
+ <section id="watch" class="media-section section-wrap" aria-labelledby="media-title">
+   <div class="frame">
+     <div class="section-intro"><div><p class="eyebrow"><span class="eyebrow-bar"></span> THE VIDEO LIBRARY</p><h2 id="media-title">See the story.<br><span>Find your perspective.</span></h2></div><p>Explore our published presentations. Choose the topics that matter to you and watch at your own pace.</p></div>
+     <div class="video-toolbar"><span id="publicVideoCount">PUBLISHED VIDEOS</span><div id="videoFilters" class="video-filters" aria-label="Filter video presentations"></div></div>
+     <div id="videoGrid" class="video-grid" aria-live="polite"></div>
+     <div id="emptyVideos" class="video-empty" hidden><span class="empty-icon">▶</span><h3>Presentations are on their way.</h3><p>We’re preparing videos to help you get to know this offer better. The information below is available in the meantime.</p></div>
+   </div>
+ </section>
+
+ <section id="about" class="narrative-section section-wrap">
+  <div class="frame story-grid">
+   <div class="story-heading"><p class="eyebrow"><span class="eyebrow-bar"></span> UNDERSTANDING THE CHALLENGE</p><h2><span data-text="storyTitle">Good ideas have a way of</span> <span class="text-accent" data-text="storyHighlight">getting stuck.</span></h2><div class="story-graphic"><span>THE GAP BETWEEN</span><div class="diagram-circles"><b>IDEA</b><div class="line-dashes">········→</div><b>ACTION</b></div><span>WHAT IF IT FELT SIMPLER?</span></div></div>
+   <div class="story-body"><span class="section-count">01 — THE CHALLENGE</span><p data-text="storyParagraph1">Another open tab. Another saved tutorial. Another week spent wondering if your idea is ready.</p><p data-text="storyParagraph2">The hardest part isn't always finding an idea. It's knowing what to do with it next.</p><div class="story-takeaway"><span class="takeaway-mark">↗</span><strong data-text="shiftText">You don't need a hundred more ideas. You need a clear path for one.</strong></div></div>
+  </div>
+ </section>
+
+ <section id="process" class="process-section section-wrap">
+  <div class="frame"><div class="section-intro"><div><p class="eyebrow"><span class="eyebrow-bar"></span> THE APPROACH</p><h2><span data-text="methodTitle">A little structure.</span><br><span class="text-accent" data-text="methodHighlight">A lot more clarity.</span></h2></div><p data-text="methodSubtitle">Four grounded steps to move from overthinking to something real.</p></div>
+   <div id="stepsGrid" class="steps-grid"></div>
+  </div>
+ </section>
+
+ <section id="offer" class="offer-section section-wrap">
+  <div class="frame offer-layout">
+   <div class="offer-message"><p class="eyebrow"><span class="eyebrow-bar"></span> BUILT AROUND YOUR NEXT MOVE</p><h2><span data-text="offerHeading">Everything you need</span><br><span class="text-accent" data-text="offerHighlight">to get moving.</span></h2><p data-text="offerSubtitle">Less piecing things together from twenty different places. More room to focus on the work that matters.</p><div class="offer-abstract" aria-hidden="true"><span>GO FURTHER</span><strong>01<span>↗</span></strong><div class="abstract-orbit"></div></div></div>
+   <div class="offer-panel">
+    <div class="offer-panel-top"><span class="pill-light">THE OFFER</span><span class="offer-spark">✳</span></div>
+    <h3 data-text="offerName">The Creator Launch System</h3>
+    <p data-text="offerDescription">A practical digital playbook for turning one good idea into a real, ready-to-share offer.</p>
+    <div class="offer-divider"></div><span class="offer-miniheading">WHAT'S INCLUDED</span>
+    <ul id="offerItems" class="include-list"></ul>
+    <div class="offer-price"><span>YOUR INVESTMENT</span><strong data-text="price">Contact for pricing</strong><small data-text="priceNote">Flexible options</small></div>
+    <button type="button" class="button button-dark offer-button" data-buy><span data-text="cta">Get in touch</span><span aria-hidden="true">↗</span></button>
+    <div class="offer-reassure" id="offerReassure">Questions? We’re here to help you make an informed decision.</div>
+   </div>
+  </div>
+ </section>
+
+ <section class="trust-section section-wrap"><div class="frame trust-grid">
+  <div><p class="eyebrow"><span class="eyebrow-bar"></span> NO SHORTCUTS. JUST CLARITY.</p><h2><span data-text="trustTitle">Clarity comes</span> <span class="text-accent" data-text="trustHighlight">first.</span></h2></div>
+  <div><span class="trust-quote">“</span><p data-text="trustText">Explore what is included and decide whether this approach fits your goals. We believe the right purchase starts with clear, useful information.</p><div class="trust-rule"></div><span class="trust-caption">DISCOVER. CONSIDER. DECIDE.</span></div>
+ </div></section>
+
+ <section id="faq" class="faq-section section-wrap"><div class="frame faq-layout"><div class="faq-lead"><p class="eyebrow"><span class="eyebrow-bar"></span> GOOD TO KNOW</p><h2>Questions,<br><span class="text-accent">answered.</span></h2><p>Take a closer look at the details before making your move.</p></div><div id="faqList" class="faq-list"></div></div></section>
+
+ <section class="end-section section-wrap"><div class="frame end-inner">
+   <div class="end-badge"><span class="signal"></span> READY WHEN YOU ARE</div>
+   <h2><span data-text="closingTitle">That thing you've</span><br><span data-text="closingLine2">been thinking about?</span><br><span class="end-accent" data-text="closingHighlight">Let's start there.</span></h2>
+   <button class="button button-lime end-button" type="button" data-buy><span data-text="cta">Get in touch</span><span>↗</span></button>
+   <div class="end-flare">✳</div>
+ </div></section>
+</main>
+<footer class="site-footer"><div class="frame"><div class="footer-primary"><a class="wordmark" href="#top"><span class="brand-symbol"><span></span><span></span><span></span></span><span data-text="brand">GOODFORM</span><span class="brand-dot">.</span></a><p data-text="footerNote">A good place for great ideas.</p></div><div class="footer-links"><a href="#watch">Videos</a><a href="#offer">Offer</a><a href="#faq">FAQ</a><a href="/privacy">Privacy</a></div><div class="footer-bottom"><span>© <span id="year"></span> <span data-text="brand">GOODFORM</span>. All rights reserved.</span><a href="#top">BACK TO TOP ↑</a></div></div></footer>
+</div>
+<div class="mobile-cta"><span><small>THE OFFER</small><strong data-text="offerName">The Creator Launch System</strong></span><button type="button" data-buy>Explore ↗</button></div>
+
+<dialog id="videoDialog" class="video-dialog" aria-label="Video player">
+  <div class="player-head"><div><span class="player-eyebrow">NOW PLAYING</span><h3 id="playingTitle">Video title</h3></div><button type="button" id="closeVideo" class="dialog-close" aria-label="Close video">✕</button></div>
+  <div id="playerMount" class="player-mount"></div>
+  <p id="playingDescription" class="playing-description"></p>
 </dialog>
-</body>
-</html>
+<dialog id="leadDialog" class="lead-dialog" aria-labelledby="leadTitle"><button type="button" id="closeLead" class="dialog-close top-close" aria-label="Close inquiry form">✕</button>
+ <div class="lead-dialog-inner"><div class="lead-aside"><span class="lead-mark">↗</span><span>LET'S CONNECT</span><h2 id="leadTitle">Start a<br>conversation.</h2><p>Questions about the offer? Send a message and we can follow up using your email.</p></div>
+ <form id="leadForm" class="lead-fields">
+  <label>Your name <span>OPTIONAL</span><input name="name" maxlength="120" autocomplete="name" placeholder="How should we call you?"></label>
+  <label>Email address <span>REQUIRED</span><input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="you@example.com"></label>
+  <label>Message <span>OPTIONAL</span><textarea name="message" rows="4" maxlength="1200" placeholder="Tell us what you’d like to know."></textarea></label>
+  <label class="lead-consent"><input name="consent" type="checkbox" required><span>I agree to provide these details so the business can respond to my inquiry. <a href="/privacy" target="_blank" rel="noopener">Privacy notice</a></span></label>
+  <input name="website" class="honeypot" autocomplete="off" tabindex="-1" aria-hidden="true">
+  <p id="leadStatus" role="status"></p>
+  <button type="submit" id="sendLead" class="button button-dark">Send inquiry <span>↗</span></button>
+ </form></div>
+</dialog>
+</body></html>

@@ -40,6 +40,8 @@
       <button data-tab="method"><span class="nav-icon">◫</span> Process</button>
       <button data-tab="offer"><span class="nav-icon">◈</span> Offer &amp; pricing</button>
       <button data-tab="faq"><span class="nav-icon">☷</span> FAQs &amp; trust</button>
+      <button data-tab="checkout"><span class="nav-icon">▣</span> Checkout &amp; payments</button>
+      <button data-tab="orders"><span class="nav-icon">▤</span> Orders <span class="nav-counter" id="ordersCountSmall">0</span></button>
       <button data-tab="leads"><span class="nav-icon">✉</span> Inquiries <span class="nav-counter" id="leadCountSmall">0</span></button>
       <button data-tab="settings"><span class="nav-icon">⚙</span> Settings</button>
     </nav>
@@ -58,7 +60,7 @@
           <div class="stat-card"><div class="stat-head">LAST PUBLISHED <span>◷</span></div><strong class="stat-date" id="lastPublished">—</strong><small>Changes are visible as soon as you publish</small></div>
         </div>
         <div class="dashboard-snapshot"><span>VIDEO LIBRARY</span><strong id="overviewVideos">0 videos ready</strong><button type="button" data-go="videos">Manage videos <span>→</span></button></div><div class="overview-layout">
-          <div class="editor-card"><p class="overline">QUICK START</p><h2>Build your next conversion.</h2><p>Update your message, grow your video library and publish buyer-ready content—without touching code.</p><div class="quick-actions"><button class="quick-action" data-go="hero"><span>01</span><strong>Edit the sales page</strong><span>→</span></button><button class="quick-action" data-go="videos"><span>02</span><strong>Add and publish videos</strong><span>→</span></button><button class="quick-action" data-go="offer"><span>03</span><strong>Set up your offer</strong><span>→</span></button></div></div>
+          <div class="editor-card"><p class="overline">QUICK START</p><h2>Build your next conversion.</h2><p>Update your message, grow your video library and publish buyer-ready content—without touching code.</p><div class="quick-actions"><button class="quick-action" data-go="hero"><span>01</span><strong>Edit the sales page</strong><span>→</span></button><button class="quick-action" data-go="videos"><span>02</span><strong>Add and publish videos</strong><span>→</span></button><button class="quick-action" data-go="checkout"><span>03</span><strong>Set up checkout</strong><span>→</span></button></div></div>
           <div class="tip-card"><div class="tip-icon">↗</div><p class="overline">GOOD TO KNOW</p><h3>Make changes.<br>Go live when ready.</h3><p><strong>Save draft</strong> keeps your edits private. <strong>Publish changes</strong> updates the buyer website instantly without a GitHub push or Railway rebuild.</p><a href="/" target="_blank" rel="noopener">See the live website ↗</a></div>
         </div>
       </section>
@@ -108,6 +110,31 @@
         <div class="editor-card"><div class="card-heading"><div><p class="overline">TRUST &amp; CLARITY</p><h2>How you build confidence</h2></div></div><div class="input-grid"><label>Trust headline<input data-field="trustTitle"></label><label>Highlighted phrase<input data-field="trustHighlight"></label><label class="full">Trust section paragraph<textarea data-field="trustText" rows="3"></textarea></label></div></div>
         <div class="editor-card"><div class="card-heading"><div><p class="overline">BUYER QUESTIONS</p><h2>Frequently asked questions</h2></div><button type="button" class="secondary-button" id="addFaq">+ Add FAQ</button></div><div id="faqEditors" class="faq-editors"></div><p class="muted-note">Write clear, accurate answers. Avoid promises you cannot verify.</p></div>
         <div class="editor-card"><div class="card-heading"><div><p class="overline">FINAL CALL TO ACTION</p><h2>Close the story</h2></div></div><div class="input-grid"><label>Headline line 1<input data-field="closingTitle"></label><label>Headline line 2<input data-field="closingLine2"></label><label class="full">Highlighted closing line<input data-field="closingHighlight"></label></div></div>
+      </section>
+
+      <section class="panel" data-panel="checkout" hidden>
+        <div class="checkout-admin-banner"><div><span class="overline">CHECKOUT SITE</span><h2>Your own checkout, connected.</h2><p>Configure the selling price and accepted payment methods. A customer order is recorded as <strong>pending</strong>; you must verify payment manually before fulfillment.</p></div><a href="/checkout" target="_blank" rel="noopener" class="secondary-button">View checkout site ↗</a></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">CHECKOUT AVAILABILITY</p><h2>Accept orders</h2></div><span class="section-pill">PAYMENT SETTINGS</span></div>
+         <div class="checkout-admin-toggle"><label><strong>Enable checkout</strong><small>Allow buyers to place orders through your dedicated checkout website.</small></label><input type="checkbox" data-setting="checkoutEnabled" id="enableCheckout"></div>
+         <div class="input-grid"><label>Unit price (PHP) <small>Use numbers only. Example: 1490 or 1490.50. The amount is fixed by the server and cannot be edited by buyers.</small><input data-field="checkoutAmount" type="number" inputmode="decimal" min="0.01" max="9999999.99" step=".01" placeholder="1490.00"></label>
+         <label>Currency <input value="Philippine Peso (PHP)" readonly></label>
+         </div><p class="muted-note">When checkout is enabled, the sales-page buy buttons open your own checkout site. Disabling checkout does not erase existing orders.</p>
+        </div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">MANUAL PAYMENT OPTIONS</p><h2>How buyers can pay</h2></div></div>
+         <div class="checkout-pay-section"><div class="checkout-admin-toggle"><label><strong>GCash transfer</strong><small>Show your recipient details and collect a payment reference.</small></label><input type="checkbox" data-setting="checkoutGcashEnabled"></div><div class="input-grid"><label>GCash recipient name<input data-field="checkoutGcashName" maxlength="100" placeholder="Account holder's name"></label><label>GCash number<input data-field="checkoutGcashNumber" maxlength="35" placeholder="09XXXXXXXXX"></label></div></div>
+         <div class="checkout-pay-section"><div class="checkout-admin-toggle"><label><strong>Bank transfer</strong><small>Display your bank account and collect a transfer reference.</small></label><input type="checkbox" data-setting="checkoutBankEnabled"></div><div class="input-grid"><label>Bank name<input data-field="checkoutBankName" maxlength="120" placeholder="Your bank"></label><label>Account holder<input data-field="checkoutBankAccountName" maxlength="120" placeholder="Full registered name"></label><label class="full">Bank account number<input data-field="checkoutBankAccountNumber" maxlength="65" placeholder="Account number"></label></div></div>
+         <div class="checkout-pay-section"><div class="checkout-admin-toggle"><label><strong>Arrange payment with buyer</strong><small>Record an order first and contact the buyer to arrange payment.</small></label><input type="checkbox" data-setting="checkoutArrangeEnabled"></div></div>
+         <div class="input-grid"><label class="full">Payment and fulfillment instructions <small>Shown to buyers after an order is created. Do not request card PINs, passwords or OTPs.</small><textarea data-field="checkoutInstructions" maxlength="1200" rows="4" placeholder="We will contact you with the next steps..."></textarea></label></div>
+         <p class="payment-caution">Payments are not automatically charged or verified. You must verify transfers yourself in the Orders tab. To accept automated card payments later, a verified payment gateway account must be connected.</p>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="orders" hidden>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">SALES OPERATIONS</p><h2>Order management <span id="ordersBadge" class="section-pill">0</span></h2></div><a href="/api/admin/orders.csv" class="secondary-button">Export orders CSV ↓</a></div>
+          <p class="muted-note">Orders are captured immediately. Mark a payment as verified only after confirming funds independently. Fulfillment is recorded manually.</p>
+          <div class="order-stats"><div><small>TOTAL ORDERS</small><strong id="ordersTotal">0</strong></div><div><small>AWAITING PAYMENT</small><strong id="ordersUnpaid">0</strong></div><div><small>VERIFIED PAYMENTS</small><strong id="ordersVerified">0</strong></div></div>
+          <div id="ordersList" class="orders-list"><div class="orders-placeholder">No orders have been placed yet.</div></div>
+        </div>
       </section>
 
       <section class="panel" data-panel="leads" hidden>

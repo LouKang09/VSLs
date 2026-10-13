@@ -68,15 +68,18 @@ function renderNextSteps(o){
   else if(o.method==="gcash"){
     message.textContent="Send the exact amount to the GCash account below, then enter the transaction reference. A submitted reference does not automatically verify payment.";
     box.append(message);
-    if(config?.gcash){appendDetail(box,"Recipient",config.gcash.name);appendDetail(box,"GCash number",config.gcash.number);}
+    const gcash=o.paymentDetails?.account||config?.gcash;
+    if(gcash){appendDetail(box,"Recipient",gcash.name);appendDetail(box,"GCash number",gcash.number);}
   }else if(o.method==="bank"){
     message.textContent="Transfer the exact amount to this account, then enter your transaction reference. The seller will verify it manually.";
     box.append(message);
-    if(config?.bank){appendDetail(box,"Bank",config.bank.bank);appendDetail(box,"Account name",config.bank.name);appendDetail(box,"Account number",config.bank.number);}
+    const bank=o.paymentDetails?.account||config?.bank;
+    if(bank){appendDetail(box,"Bank",bank.bank);appendDetail(box,"Account name",bank.name);appendDetail(box,"Account number",bank.number);}
   }else message.textContent="The seller will contact you about payment and order fulfillment. This order has not been charged.";
   if(!box.contains(message))box.append(message);
-  if(config?.instructions&&o.paymentStatus!=="verified"){
-    const note=document.createElement("p");note.textContent=config.instructions;box.append(note);
+  const instructions=o.paymentDetails?.instructions??config?.instructions;
+  if(instructions&&o.paymentStatus!=="verified"){
+    const note=document.createElement("p");note.textContent=instructions;box.append(note);
   }
   $("#paymentRefForm").hidden=o.fulfillmentStatus==="cancelled"||o.paymentStatus==="verified"||!["gcash","bank"].includes(o.method);
   if(o.paymentReference)$("#paymentRefForm").elements.namedItem("paymentReference").value=o.paymentReference;

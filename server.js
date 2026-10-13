@@ -22,7 +22,8 @@ fs.mkdirSync(mediaDir,{recursive:true});
 const files = {
   content:path.join(dataDir,"content.json"),
   admin:path.join(dataDir,"admin.json"),
-  leads:path.join(dataDir,"leads.json")
+  leads:path.join(dataDir,"leads.json"),
+  orders:path.join(dataDir,"orders.json")
 };
 
 const defaults = {
@@ -57,7 +58,11 @@ const defaults = {
   ],
   closingTitle:"That thing you've",closingLine2:"been thinking about?",closingHighlight:"Let's start there.",
   cta:"Get in touch",videoUrl:"",videos:[],checkoutUrl:"",supportEmail:"",
-  accent:"#6477e6",footerNote:"A good place for great ideas."
+  accent:"#6477e6",footerNote:"A good place for great ideas.",
+  checkoutEnabled:false,checkoutAmount:"",checkoutCurrency:"PHP",
+  checkoutGcashEnabled:false,checkoutGcashName:"",checkoutGcashNumber:"",
+  checkoutBankEnabled:false,checkoutBankName:"",checkoutBankAccountName:"",checkoutBankAccountNumber:"",
+  checkoutArrangeEnabled:true,checkoutInstructions:"We will contact you with the next steps for your order."
 };
 
 function readJSON(file, fallback) {
@@ -75,6 +80,7 @@ function atomicWrite(file,data) {
 function initContent() {
   if(!fs.existsSync(files.content)) atomicWrite(files.content,{draft:defaults,published:defaults,version:1,publishedAt:new Date().toISOString(),draftAt:new Date().toISOString()});
   if(!fs.existsSync(files.leads)) atomicWrite(files.leads,[]);
+  if(!fs.existsSync(files.orders)) atomicWrite(files.orders,[]);
 }
 initContent();
 
@@ -154,6 +160,26 @@ function validateContent(input) {
     if(featured)featuredSeen=true;
     return {id,title,url,poster,description:clean(item?.description,600),category:clean(item?.category,60)||"Presentation",visible,featured};
   });
+  output.checkoutEnabled=input.checkoutEnabled===true;
+  output.checkoutAmount=clean(input.checkoutAmount,20);
+  output.checkoutCurrency="PHP";
+  output.checkoutGcashEnabled=input.checkoutGcashEnabled===true;
+  output.checkoutGcashName=clean(input.checkoutGcashName,100);
+  output.checkoutGcashNumber=clean(input.checkoutGcashNumber,35);
+  output.checkoutBankEnabled=input.checkoutBankEnabled===true;
+  output.checkoutBankName=clean(input.checkoutBankName,120);
+  output.checkoutBankAccountName=clean(input.checkoutBankAccountName,120);
+  output.checkoutBankAccountNumber=clean(input.checkoutBankAccountNumber,65);
+  output.checkoutArrangeEnabled=input.checkoutArrangeEnabled===true;
+  output.checkoutInstructions=clean(input.checkoutInstructions,1200);
+  if(output.checkoutAmount && (!/^(?:0|[1-9]\d{0,7})(?:\.\d{1,2})?$/.test(output.checkoutAmount)||Number(output.checkoutAmount)>9999999.99))
+    throw Error("Checkout amount must be a valid peso amount with up to two decimals");
+  if(output.checkoutEnabled){
+    if(!output.checkoutAmount || Number(output.checkoutAmount)<=0)throw Error("Enable checkout only after setting a valid price above zero");
+    if(!output.checkoutGcashEnabled&&!output.checkoutBankEnabled&&!output.checkoutArrangeEnabled)throw Error("Enable at least one checkout payment option");
+    if(output.checkoutGcashEnabled&&(!output.checkoutGcashName||!/^\+?[\d\s()-]{9,20}$/.test(output.checkoutGcashNumber)))throw Error("GCash needs a recipient name and a valid phone number");
+    if(output.checkoutBankEnabled&&(!output.checkoutBankName||!output.checkoutBankAccountName||!output.checkoutBankAccountNumber))throw Error("Bank transfer needs a bank name, account name and account number");
+  }
   return output;
 }
 function clientIp(req){return String(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").split(",")[0].trim().slice(0,80);}
@@ -276,7 +302,7 @@ function serveMedia(req,res,pathname){
     fs.createReadStream(location).pipe(res);
   });
 }
-const staticFiles={"/":"index.html","/index.html":"index.html","/styles.css":"styles.css","/script.js":"script.js","/admin":"admin.html","/admin.html":"admin.html","/admin.js":"admin.js","/admin.css":"admin.css","/favicon.svg":"favicon.svg","/robots.txt":"robots.txt","/privacy": "privacy.html","/privacy.html":"privacy.html"};
+const staticFiles={"/checkout":"checkout.html","/checkout/":"checkout.html","/checkout.html":"checkout.html","/checkout.js":"checkout.js","/checkout.css":"checkout.css","/":"index.html","/index.html":"index.html","/styles.css":"styles.css","/script.js":"script.js","/admin":"admin.html","/admin.html":"admin.html","/admin.js":"admin.js","/admin.css":"admin.css","/favicon.svg":"favicon.svg","/robots.txt":"robots.txt","/privacy": "privacy.html","/privacy.html":"privacy.html"};
 const mimes={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"application/javascript; charset=utf-8",".svg":"image/svg+xml",".txt":"text/plain; charset=utf-8"};
 function serveStatic(req,res,pathname){
   const name=staticFiles[pathname];
@@ -304,7 +330,46 @@ function csvField(x){
   if(/^[=+@\-\t\r]/.test(value))value="'"+value;
   return '"'+value.replace(/"/g,'""')+'"';
 }
+function publishedCheckout(){
+  const content=readJSON(files.content,null).published;
+  const p=hydrateContent(content);
+  const amount=Number(p.checkoutAmount);
+  const enabled=p.checkoutEnabled===true && Number.isFinite(amount) && amount>0 && amount<=9999999.99 &&
+    (p.checkoutArrangeEnabled || (p.checkoutGcashEnabled&&p.checkoutGcashName&&p.checkoutGcashNumber) ||
+     (p.checkoutBankEnabled&&p.checkoutBankName&&p.checkoutBankAccountName&&p.checkoutBankAccountNumber));
+  return {
+    enabled:!!enabled,amountCents:enabled?Math.round(amount*100):0,currency:"PHP",
+    product:clean(p.offerName,140),description:clean(p.offerDescription,800),brand:clean(p.brand,100),supportEmail:clean(p.supportEmail,254),
+    options:{
+      gcash:!!(p.checkoutGcashEnabled&&p.checkoutGcashName&&p.checkoutGcashNumber),
+      bank:!!(p.checkoutBankEnabled&&p.checkoutBankName&&p.checkoutBankAccountName&&p.checkoutBankAccountNumber),
+      arrange:!!p.checkoutArrangeEnabled
+    },
+    gcash: {name:clean(p.checkoutGcashName,100),number:clean(p.checkoutGcashNumber,35)},
+    bank: {bank:clean(p.checkoutBankName,120),name:clean(p.checkoutBankAccountName,120),number:clean(p.checkoutBankAccountNumber,65)},
+    instructions:clean(p.checkoutInstructions,1200)
+  };
+}
+function publicOrder(o) {
+  return {ref:o.ref,createdAt:o.createdAt,customerName:o.customerName,email:o.email,product:o.product,
+    amountCents:o.amountCents,currency:o.currency,method:o.method,paymentStatus:o.paymentStatus,
+    fulfillmentStatus:o.fulfillmentStatus,paymentReference:o.paymentReference||"",updatedAt:o.updatedAt};
+}
+function validOrderAccess(ref,key,o){
+  if(!o||o.ref!==ref||!key||key.length>128)return false;
+  const digest=crypto.createHash("sha256").update(key).digest("hex");
+  return tokenEqual(digest,o.keyHash);
+}
 async function handleApi(req,res,pathname){
+  if(req.method==="GET"&&pathname==="/api/checkout/config")return json(res,200,publishedCheckout());
+  if(req.method==="GET"&&pathname==="/api/orders/status"){
+    if(throttle("order-read:"+clientIp(req),90,15*60*1000))return fail(res,429,"Too many lookups");
+    const query=new URL(req.url,"http://localhost").searchParams;
+    const ref=clean(query.get("ref"),45),key=clean(query.get("key"),128);
+    const found=readJSON(files.orders,[]).find(o=>o.ref===ref);
+    if(!validOrderAccess(ref,key,found))return fail(res,404,"Order not found");
+    return json(res,200,{order:publicOrder(found)});
+  }
   if(req.method==="GET"&&pathname==="/api/public"){
     const content=readJSON(files.content,null);
     return json(res,200,{...hydrateContent(content.published),videos:hydrateContent(content.published).videos.filter(v=>v.visible),publishedAt:content.publishedAt});
@@ -317,6 +382,18 @@ async function handleApi(req,res,pathname){
   if(req.method==="GET"&&pathname==="/api/admin/content"){
     const state=readJSON(files.content,null);
     return json(res,200,{...state,draft:hydrateContent(state.draft),published:hydrateContent(state.published)});
+  }
+  if(req.method==="GET"&&pathname==="/api/admin/orders"){
+    const list=readJSON(files.orders,[]);
+    return json(res,200,{orders:list.slice(-800).reverse().map(({keyHash,...order})=>order),count:list.length});
+  }
+  if(req.method==="GET"&&pathname==="/api/admin/orders.csv"){
+    const list=readJSON(files.orders,[]);
+    const header="Reference,Date,Name,Email,Phone,Product,Amount PHP,Payment Method,Payment Reference,Payment Status,Fulfillment Status,Notes";
+    const rows=list.map(o=>[o.ref,o.createdAt,o.customerName,o.email,o.phone,o.product,(o.amountCents/100).toFixed(2),
+      o.method,o.paymentReference||"",o.paymentStatus,o.fulfillmentStatus,o.notes||""].map(csvField).join(","));
+    res.writeHead(200,{"Content-Type":"text/csv; charset=utf-8","Content-Disposition":"attachment; filename=vsl-orders.csv","Cache-Control":"no-store"});
+    return res.end([header,...rows].join("\r\n"));
   }
   if(req.method==="GET"&&pathname==="/api/admin/leads"){
     const leads=readJSON(files.leads,[]);
@@ -353,6 +430,37 @@ async function handleApi(req,res,pathname){
     attempts.delete("login:"+ip);
     return sendSession(res,admin);
   }
+  if(pathname==="/api/orders/create"){
+    if(throttle("order-create:"+clientIp(req),6,3600000))return fail(res,429,"Too many orders from this connection, please try later");
+    if(body.website)return fail(res,400,"Invalid request");
+    const c=publishedCheckout();
+    if(!c.enabled)return fail(res,409,"Checkout is not accepting orders yet");
+    const method=clean(body.method,20);
+    if(!["gcash","bank","arrange"].includes(method)||!c.options[method])return fail(res,400,"Choose an available payment method");
+    const name=clean(body.name,120),email=clean(body.email,254).toLowerCase(),phone=clean(body.phone,35),notes=clean(body.notes,600);
+    if(name.length<2||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||body.accepted!==true)
+      return fail(res,400,"Name, valid email and agreement to the terms are required");
+    if(phone&&!/^[+\d\s().-]{7,35}$/.test(phone))return fail(res,400,"Invalid phone number");
+    if(readJSON(files.orders,[]).length>=50000)return fail(res,503,"Order capacity reached");
+    const key=crypto.randomBytes(24).toString("base64url"),now=new Date().toISOString(),ref="VSL-"+crypto.randomBytes(5).toString("hex").toUpperCase();
+    const order={ref,keyHash:crypto.createHash("sha256").update(key).digest("hex"),createdAt:now,updatedAt:now,customerName:name,email,phone,notes,
+      product:c.product,amountCents:c.amountCents,currency:c.currency,method,paymentStatus:"unpaid",fulfillmentStatus:"new",paymentReference:""};
+    const list=readJSON(files.orders,[]);list.push(order);atomicWrite(files.orders,list);
+    return json(res,201,{ok:true,ref,key,order:publicOrder(order)});
+  }
+  if(pathname==="/api/orders/reference"){
+    if(throttle("order-ref:"+clientIp(req),12,3600000))return fail(res,429,"Too many attempts");
+    const ref=clean(body.ref,45),key=clean(body.key,128),paymentReference=clean(body.paymentReference,100);
+    if(paymentReference.length<5||!/[0-9]/.test(paymentReference))return fail(res,400,"Provide your transaction reference number");
+    const list=readJSON(files.orders,[]),index=list.findIndex(o=>o.ref===ref);
+    if(index<0||!validOrderAccess(ref,key,list[index]))return fail(res,404,"Order not found");
+    const order=list[index];
+    if(!["gcash","bank"].includes(order.method)||order.fulfillmentStatus==="cancelled")return fail(res,409,"Payment reference is not available for this order");
+    if(order.paymentStatus==="verified")return fail(res,409,"This payment has already been verified");
+    order.paymentReference=paymentReference;order.paymentStatus="submitted";order.updatedAt=new Date().toISOString();
+    atomicWrite(files.orders,list);
+    return json(res,200,{ok:true,order:publicOrder(order)});
+  }
   if(pathname==="/api/leads"){
     if(throttle("leads:"+clientIp(req),5,3600000))return fail(res,429,"Too many submissions, please try later");
     if(body.website)return json(res,200,{ok:true});
@@ -365,6 +473,22 @@ async function handleApi(req,res,pathname){
     return json(res,201,{ok:true,message:"Thanks. Your message was received."});
   }
   if(!verifySession(req))return fail(res,401,"Sign in to continue");
+  if(pathname==="/api/admin/orders/update"){
+    const ref=clean(body.ref,45),action=clean(body.action,30);
+    if(!["verify","unverify","fulfill","reopen","cancel"].includes(action))return fail(res,400,"Invalid order action");
+    const list=readJSON(files.orders,[]),order=list.find(o=>o.ref===ref);
+    if(!order)return fail(res,404,"Order not found");
+    if(action==="verify")order.paymentStatus="verified";
+    if(action==="unverify")order.paymentStatus="unpaid";
+    if(action==="fulfill"){
+      if(order.paymentStatus!=="verified")return fail(res,409,"Verify payment before marking the order fulfilled");
+      order.fulfillmentStatus="fulfilled";
+    }
+    if(action==="reopen")order.fulfillmentStatus="new";
+    if(action==="cancel")order.fulfillmentStatus="cancelled";
+    order.updatedAt=new Date().toISOString();atomicWrite(files.orders,list);
+    return json(res,200,{ok:true,order:publicOrder(order)});
+  }
   if(pathname==="/api/admin/leads/delete"){
     const id=clean(body.id,80);
     const existing=readJSON(files.leads,[]);

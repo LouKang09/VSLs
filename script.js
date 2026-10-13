@@ -129,6 +129,8 @@ function renderGrid(){
 }
 function render(data){
   page=data;
+  $("#checkoutNavLink").hidden=data.checkoutEnabled!==true;
+  $("#checkoutFooterLink").hidden=data.checkoutEnabled!==true;
   document.documentElement.style.setProperty("--accent",/^#[0-9a-f]{6}$/i.test(data.accent)?data.accent:"#6477e6");
   $$("[data-text]").forEach(el=>{const value=data[el.dataset.text];if(typeof value==="string")el.textContent=value;});
   renderSteps(data.steps);renderOffer(data.offerItems);renderFaqs(data.faqs);renderFilters();renderGrid();renderHeroVideo();
@@ -159,7 +161,12 @@ const nav=$("#mainNav"),menu=$("#menuButton");
 menu.addEventListener("click",()=>{const open=!nav.classList.contains("open");nav.classList.toggle("open",open);menu.setAttribute("aria-expanded",String(open));});
 nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false");}));
 const lead=$("#leadDialog");
-function buy(){const url=escapeUrl(page?.checkoutUrl);if(url&&url.protocol==="https:")window.open(url.href,"_blank","noopener,noreferrer");else lead.showModal();}
+function buy(){
+  if(page?.checkoutEnabled===true){location.assign("/checkout");return;}
+  const url=escapeUrl(page?.checkoutUrl);
+  if(url&&url.protocol==="https:")window.open(url.href,"_blank","noopener,noreferrer");
+  else lead.showModal();
+}
 $$("[data-buy]").forEach(el=>el.addEventListener("click",buy));
 $("#closeLead").addEventListener("click",()=>lead.close());
 $("#leadForm").addEventListener("submit",async event=>{

@@ -20,3 +20,38 @@
 
 /* Keep account and sign-out accessible on tablets and phones. */
 @media(max-width:830px){.sidebar-bottom{display:flex;margin:0;padding:8px 3px 0;align-items:center;justify-content:space-between;border-top:1px solid #ffffff1c}.sidebar-user .avatar{width:27px;height:27px;font-size:11px;border-radius:7px}.sidebar-user strong{font-size:10px}.sidebar-user small{font-size:9px}.sidebar-logout{padding:8px 5px;color:#c5d4f1}}
+
+
+/* Checkout manager + order operations */
+.checkout-admin-banner{display:flex;justify-content:space-between;align-items:center;gap:25px;border-radius:13px;background:linear-gradient(118deg,#222d5d,#6777cb);padding:33px 34px;margin-bottom:20px;color:#fff}
+.checkout-admin-banner .overline{color:#c4d0ff}.checkout-admin-banner h2{font-size:29px;line-height:1.18;margin-bottom:9px}.checkout-admin-banner p{font-size:12px;color:#d9e2fb;line-height:1.8;max-width:670px;margin:0}
+.checkout-admin-banner .secondary-button{flex:none;border-color:#ffffff47;color:#fff;background:#ffffff19}.checkout-admin-banner .secondary-button:hover{background:#ffffff33;color:white}
+.checkout-admin-toggle{display:flex;align-items:center;justify-content:space-between;gap:20px;background:#f8faff;border-radius:10px;border:1px solid #e8ecf7;padding:18px 19px;margin-bottom:22px}
+.checkout-admin-toggle label{display:flex;flex-direction:column;gap:5px;cursor:pointer}
+.checkout-admin-toggle label strong{font-size:13px;color:#364158}.checkout-admin-toggle label small{font-size:11px;line-height:1.6;color:#8e9aab}
+.checkout-admin-toggle input{height:22px;width:22px;accent-color:#5468e6;flex:none;cursor:pointer}
+.checkout-pay-section{padding:0 0 26px;border-bottom:1px solid #e7ebf2;margin-bottom:25px}
+.checkout-pay-section>.checkout-admin-toggle{margin-bottom:17px}
+.payment-caution{font-size:12px!important;line-height:1.8!important;border:1px solid #efe1bf;border-radius:8px;background:#fffaf0;color:#a37a36!important;padding:15px 17px;margin-top:24px}
+.order-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:21px 0}
+.order-stats>div{background:#f6f8fd;border:1px solid #e7ebf5;border-radius:10px;padding:19px}
+.order-stats small{display:block;color:#8c98ab;font-size:9px;letter-spacing:.11em;font-weight:800;margin-bottom:9px}
+.order-stats strong{font:800 25px Manrope;letter-spacing:-.07em}
+.orders-list{display:grid;gap:14px}.orders-placeholder{border:1px dashed #d1d9ea;background:#f9fbff;border-radius:11px;padding:60px 30px;color:#8a97a8;font-size:13px;text-align:center}
+.admin-order{border:1px solid #e4e8f0;background:#fff;border-radius:12px;padding:22px}
+.admin-order-top{display:flex;align-items:start;justify-content:space-between;gap:15px;padding-bottom:14px;border-bottom:1px solid #e9edf4}
+.admin-order-top h3{font-size:18px;letter-spacing:-.035em;margin:0 0 5px}.admin-order-top small{font-size:10px;color:#9aa4b4}
+.order-badge{font-size:10px;font-weight:800;padding:8px 10px;border-radius:6px;white-space:nowrap}
+.order-badge.pending{background:#fff4db;color:#9c7228}.order-badge.submitted{background:#e9edff;color:#4f61ba}
+.order-badge.verified{background:#e0f7eb;color:#16865a}.order-badge.cancelled{background:#ffedf0;color:#b95d64}
+.admin-order-details{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:19px;padding:23px 0}
+.admin-order-details>div{min-width:0}.admin-order-details small{display:block;color:#96a0ae;font-size:9px;font-weight:800;letter-spacing:.08em;margin-bottom:8px}
+.admin-order-details strong{display:block;font-size:11px;line-height:1.6;font-weight:700;color:#39465b;overflow-wrap:anywhere}
+.admin-order-notes{background:#f6f8fc;border-radius:7px;color:#717c91;font-size:11px;line-height:1.8;padding:12px}
+.admin-order-actions{border-top:1px solid #e9edf4;padding-top:15px;display:flex;gap:9px;flex-wrap:wrap}
+.admin-order-actions button{font-size:11px;font-weight:800;background:#fff;border:1px solid #dfe6ef;border-radius:7px;padding:10px 13px;color:#68748a}
+.admin-order-actions button.order-verify{background:#e7f8ee;color:#228456;border-color:#caeedb}
+.admin-order-actions button.order-fulfill{background:#edf0ff;color:#5665bf;border-color:#dce1ff}
+.admin-order-actions button.order-cancel{color:#b65361;border-color:#f4d6da}
+@media(max-width:780px){.checkout-admin-banner{flex-direction:column;align-items:stretch;padding:25px}.checkout-admin-banner .secondary-button{width:100%}.admin-order-details{grid-template-columns:repeat(2,minmax(0,1fr))}.order-stats{gap:7px}.order-stats>div{padding:13px}.order-stats small{font-size:8px}.order-stats strong{font-size:21px}}
+@media(max-width:480px){.admin-order{padding:15px}.admin-order-top h3{font-size:15px}.order-badge{font-size:8px;padding:7px}.admin-order-details{gap:15px 9px}.admin-order-actions button{font-size:10px;padding:8px}}

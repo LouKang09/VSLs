@@ -373,7 +373,11 @@ async function handleApi(req,res,pathname){
     atomicWrite(files.leads,filtered);
     return json(res,200,{ok:true,deleted:1});
   }
-  if(pathname==="/api/admin/logout")return clearSession(res);
+  if(pathname==="/api/admin/logout"){
+    const admin=readJSON(files.admin,null);
+    if(admin){admin.sessionVersion+=1;atomicWrite(files.admin,admin);}
+    return clearSession(res);
+  }
   if(pathname==="/api/admin/password"){
     const admin=readJSON(files.admin,null);
     const current=String(body.currentPassword||""),next=String(body.newPassword||"");

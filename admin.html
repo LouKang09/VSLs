@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#182522"><title>VSLs Admin — Content Studio</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="/admin.css"><script defer src="/admin.js"></script></head>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><meta name="theme-color" content="#101827"><title>VSLs Studio — Website Manager</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/admin.css"><script defer src="/admin.js"></script></head>
 <body>
 <div id="authShell" class="auth-shell" hidden>
-  <div class="auth-illustration"><a href="/" class="auth-brand"><span class="brand-icon">⌁</span> VSLs <small>CONTENT STUDIO</small></a><div class="auth-quote"><div class="star">✳</div><h1>Sell a better<br><em>story.</em></h1><p>All the tools to shape your message, update your offer and publish it when you're ready.</p><div class="auth-decoration">CREATE · REFINE · PUBLISH ↗</div></div></div>
+  <div class="auth-illustration"><a href="/" class="auth-brand"><span class="brand-icon">▰</span> VSLs <small>STUDIO / ADMIN</small></a><div class="auth-quote"><div class="star">✳</div><h1>Manage a better<br><em>experience.</em></h1><p>A single workspace to manage your sales page, publish videos and connect with buyers.</p><div class="auth-decoration">CREATE / MANAGE / PUBLISH</div></div></div>
   <div class="auth-right">
     <div class="auth-panel" id="loginPanel" hidden>
       <p class="overline">WELCOME BACK</p><h2>Sign in to your studio.</h2><p class="help-copy">Manage what your customers see. Your login stays private.</p>
@@ -31,23 +31,24 @@
 <div class="loading-shell" id="loadingShell"><div class="loading-symbol">✳</div><strong>Preparing your content studio…</strong></div>
 <div class="dashboard" id="dashboard" hidden>
   <aside class="sidebar">
-    <a href="/" class="sidebar-logo"><span class="brand-icon">⌁</span><span>VSLs <small>CONTENT STUDIO</small></span></a>
+    <a href="/" class="sidebar-logo"><span class="brand-icon">▰</span><span>VSLs <small>STUDIO / ADMIN</small></span></a>
     <div class="sidebar-label">WORKSPACE</div>
     <nav aria-label="Admin sections" class="sidebar-nav" id="sidebarNav">
       <button data-tab="overview" class="active"><span class="nav-icon">◫</span> Overview</button>
-      <button data-tab="hero"><span class="nav-icon">✳</span> Headline &amp; story</button>
-      <button data-tab="method"><span class="nav-icon">◈</span> How it works</button>
-      <button data-tab="offer"><span class="nav-icon">◇</span> Offer &amp; pricing</button>
+      <button data-tab="hero"><span class="nav-icon">✎</span> Page content</button>
+      <button data-tab="videos"><span class="nav-icon">▷</span> Video library <span class="nav-counter" id="videoCountSmall">0</span></button>
+      <button data-tab="method"><span class="nav-icon">◫</span> Process</button>
+      <button data-tab="offer"><span class="nav-icon">◈</span> Offer &amp; pricing</button>
       <button data-tab="faq"><span class="nav-icon">☷</span> FAQs &amp; trust</button>
-      <button data-tab="leads"><span class="nav-icon">✉</span> Buyer inquiries <span class="nav-counter" id="leadCountSmall">0</span></button>
-      <button data-tab="settings"><span class="nav-icon">⚙</span> Brand &amp; settings</button>
+      <button data-tab="leads"><span class="nav-icon">✉</span> Inquiries <span class="nav-counter" id="leadCountSmall">0</span></button>
+      <button data-tab="settings"><span class="nav-icon">⚙</span> Settings</button>
     </nav>
     <div class="sidebar-bottom"><div class="sidebar-user"><span class="avatar">A</span><span><strong id="loggedUser">Administrator</strong><small>Site administrator</small></span></div><button id="logoutButton" class="sidebar-logout">Log out ↗</button></div>
   </aside>
   <div class="main-area">
-    <header class="admin-topbar"><div class="crumb">VSLs <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="top-status"><i></i> Public site online</span><a href="/?preview=draft" target="_blank" rel="noopener" class="preview-link">Preview saved draft ↗</a><a href="/" target="_blank" rel="noopener" class="preview-link">Buyer site ↗</a></div></header>
+    <header class="admin-topbar"><div class="crumb">VSLs <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="top-status"><i></i> Live website</span><a href="/?preview=draft" target="_blank" rel="noopener" class="preview-link">Preview draft ↗</a><a href="/" target="_blank" rel="noopener" class="preview-link">Open site ↗</a></div></header>
     <main class="dashboard-content">
-      <div class="page-heading"><div><p class="overline">YOUR SALES PAGE</p><h1 id="panelTitle">Your content, under control.</h1><p id="panelSubtitle">Edit your message and publish changes instantly to the buyer-facing website.</p></div><div class="heading-actions" id="publishActions"><button type="button" id="saveDraft" class="secondary-button">Save draft</button><button type="button" id="publishNow" class="primary-button">Publish changes <span>↗</span></button></div></div>
+      <div class="page-heading"><div><p class="overline">WEBSITE MANAGEMENT</p><h1 id="panelTitle">Your site. One workspace.</h1><p id="panelSubtitle">Control your website content, videos and leads from one place.</p></div><div class="heading-actions" id="publishActions"><button type="button" id="saveDraft" class="secondary-button">Save draft</button><button type="button" id="publishNow" class="primary-button">Publish site <span>↗</span></button></div></div>
       <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
 
       <section class="panel" data-panel="overview">
@@ -56,19 +57,38 @@
           <div class="stat-card"><div class="stat-head">LEADS RECEIVED <span>✉</span></div><strong id="totalLeads">—</strong><small>Inquiries saved securely in your workspace</small></div>
           <div class="stat-card"><div class="stat-head">LAST PUBLISHED <span>◷</span></div><strong class="stat-date" id="lastPublished">—</strong><small>Changes are visible as soon as you publish</small></div>
         </div>
-        <div class="overview-layout">
-          <div class="editor-card"><p class="overline">QUICK START</p><h2>Make this website yours.</h2><p>Replace the starter copy with your real product or service, add the video that explains it and connect your checkout or booking link.</p><div class="quick-actions"><button class="quick-action" data-go="hero"><span>01</span><strong>Write your headline</strong><span>→</span></button><button class="quick-action" data-go="offer"><span>02</span><strong>Configure your offer</strong><span>→</span></button><button class="quick-action" data-go="faq"><span>03</span><strong>Answer buyer questions</strong><span>→</span></button></div></div>
-          <div class="tip-card"><div class="tip-icon">✳</div><p class="overline">GOOD TO KNOW</p><h3>Draft or publish.<br>You're in charge.</h3><p><strong>Save draft</strong> keeps your edits private. <strong>Publish changes</strong> updates the buyer website instantly without a GitHub push or Railway rebuild.</p><a href="/" target="_blank" rel="noopener">See the live website ↗</a></div>
+        <div class="dashboard-snapshot"><span>VIDEO LIBRARY</span><strong id="overviewVideos">0 videos ready</strong><button type="button" data-go="videos">Manage videos <span>→</span></button></div><div class="overview-layout">
+          <div class="editor-card"><p class="overline">QUICK START</p><h2>Build your next conversion.</h2><p>Update your message, grow your video library and publish buyer-ready content—without touching code.</p><div class="quick-actions"><button class="quick-action" data-go="hero"><span>01</span><strong>Edit the sales page</strong><span>→</span></button><button class="quick-action" data-go="videos"><span>02</span><strong>Add and publish videos</strong><span>→</span></button><button class="quick-action" data-go="offer"><span>03</span><strong>Set up your offer</strong><span>→</span></button></div></div>
+          <div class="tip-card"><div class="tip-icon">↗</div><p class="overline">GOOD TO KNOW</p><h3>Make changes.<br>Go live when ready.</h3><p><strong>Save draft</strong> keeps your edits private. <strong>Publish changes</strong> updates the buyer website instantly without a GitHub push or Railway rebuild.</p><a href="/" target="_blank" rel="noopener">See the live website ↗</a></div>
         </div>
       </section>
 
       <section class="panel" data-panel="hero" hidden>
-        <div class="editor-card"><div class="card-heading"><div><p class="overline">ABOVE THE FOLD</p><h2>Headline &amp; video</h2></div><span class="section-pill">SECTION 01</span></div>
-          <div class="input-grid"><label class="full">Eyebrow / small heading<input data-field="eyebrow" maxlength="140"></label><label>Headline — first line<input data-field="headline1" maxlength="140"></label><label>Headline — highlighted line<input data-field="headline2" maxlength="140"></label><label class="full">Hero description<textarea data-field="subtitle" rows="3" maxlength="800"></textarea></label><label class="full">VSL video URL <small>YouTube, Vimeo, or direct MP4. The public page loads your video when visitors press Play.</small><input data-field="videoUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label></div>
+        <div class="editor-card"><div class="card-heading"><div><p class="overline">ABOVE THE FOLD</p><h2>First impressions</h2></div><span class="section-pill">SECTION 01</span></div>
+          <div class="input-grid"><label class="full">Eyebrow / small heading<input data-field="eyebrow" maxlength="140"></label><label>Headline — first line<input data-field="headline1" maxlength="140"></label><label>Headline — highlighted line<input data-field="headline2" maxlength="140"></label><label class="full">Hero description<textarea data-field="subtitle" rows="3" maxlength="800"></textarea></label><div class="video-inline-tip full"><strong>▷ Your videos now live in the Video library.</strong><span>Add multiple videos, upload MP4/WebM files, add cover images, and choose which videos appear to buyers.</span><button type="button" data-go="videos">Go to video library →</button></div></div>
         </div>
         <div class="editor-card"><div class="card-heading"><div><p class="overline">PROBLEM / SOLUTION</p><h2>Tell the story</h2></div><span class="section-pill">SECTION 02</span></div>
           <div class="input-grid"><label>Problem headline<input data-field="storyTitle"></label><label>Highlighted phrase<input data-field="storyHighlight"></label><label class="full">Problem paragraph 1<textarea data-field="storyParagraph1" rows="2"></textarea></label><label class="full">Problem paragraph 2<textarea data-field="storyParagraph2" rows="2"></textarea></label><label class="full">The shift / key takeaway<textarea data-field="shiftText" rows="2"></textarea></label></div>
         </div>
+      </section>
+
+
+      <section class="panel" data-panel="videos" hidden>
+        <div class="video-toolbar-card">
+          <div><p class="overline">VIDEO MANAGEMENT</p><h2>Your video library</h2><p>Build a collection of sales videos, product demos or testimonials. Mark the videos you want buyers to see, then select <strong>Publish site</strong>.</p></div>
+          <button type="button" id="addVideo" class="primary-button">+ Add video</button>
+        </div>
+        <div class="video-insights">
+          <div><small>TOTAL VIDEOS</small><strong id="countVideos">0</strong></div>
+          <div><small>SET TO PUBLISH</small><strong id="countVisible">0</strong></div>
+          <div><small>FEATURED VIDEO</small><strong id="countFeatured">None selected</strong></div>
+        </div>
+        <div id="videoList" class="admin-video-list"></div>
+        <div id="videoEmpty" class="admin-video-empty" hidden>
+          <div>▷</div><h3>No videos yet</h3><p>Add your first video using a YouTube/Vimeo link, or upload an MP4/WebM file directly to Railway.</p>
+          <button type="button" id="emptyAddVideo" class="primary-button">+ Add your first video</button>
+        </div>
+        <p class="video-policy"><strong>Publishing note:</strong> A video marked “Show to buyers” stays unpublished until you click <strong>Publish site</strong>. Uploaded media is stored on Railway. Each video can have its own title, category, description and cover image.</p>
       </section>
 
       <section class="panel" data-panel="method" hidden>
@@ -101,4 +121,28 @@
     </main>
   </div>
 </div>
+
+<dialog id="videoEditorDialog" class="video-editor-dialog" aria-labelledby="videoModalTitle">
+ <form id="videoForm" class="video-editor-form">
+  <div class="video-modal-top"><div><p class="overline">VIDEO LIBRARY</p><h2 id="videoModalTitle">Add a video</h2><p>Create a new sales video card for your website.</p></div><button type="button" id="closeVideoEditor" class="modal-close" aria-label="Close editor">✕</button></div>
+  <div class="modal-scroll">
+   <div class="input-grid">
+    <label class="full">Video title <input name="title" required maxlength="140" placeholder="e.g. Introducing our latest offer"></label>
+    <label>Category <input name="category" maxlength="60" placeholder="Product demo, Introduction..."></label>
+    <label class="full">Description <textarea name="description" maxlength="600" rows="3" placeholder="A short introduction to this video"></textarea></label>
+    <label class="full">Video source <small>Use YouTube/Vimeo or upload MP4/WebM up to 120 MB.</small><input name="url" id="videoSourceUrl" required maxlength="1600" placeholder="https://youtube.com/watch?v=... or /media/..."></label>
+   </div>
+   <div class="upload-zone"><div><span class="upload-icon">↑</span><strong>Upload a video file</strong><small>MP4 or WebM, 120 MB maximum</small></div><label class="upload-button">Choose video<input type="file" id="videoFile" accept="video/mp4,video/webm" hidden></label></div>
+   <div class="input-grid"><label class="full">Cover image URL <small>Optional. A YouTube thumbnail is selected automatically if left blank.</small><input name="poster" id="posterSourceUrl" maxlength="1600" placeholder="https://your-site.com/cover.jpg or /media/..."></label></div>
+   <div class="upload-zone compact"><div><strong>Custom video cover</strong><small>PNG, JPG, WebP up to 8 MB</small></div><label class="upload-button">Upload image<input type="file" id="posterFile" accept="image/png,image/jpeg,image/webp" hidden></label></div>
+   <div id="uploadProgress" class="upload-progress" role="status" aria-live="polite" hidden><span id="uploadProgressText">Uploading…</span><div class="upload-track"><div id="uploadProgressBar"></div></div></div>
+   <div class="video-visibility-options">
+    <label class="toggle-row"><span><strong>Show to buyers</strong><small>Include this video on the published website</small></span><input type="checkbox" name="visible"></label>
+    <label class="toggle-row"><span><strong>Feature this video</strong><small>Display it in the main hero video player</small></span><input type="checkbox" name="featured"></label>
+   </div>
+   <p id="videoFormError" class="modal-error" role="status"></p>
+  </div>
+  <div class="video-modal-actions"><button type="button" class="secondary-button" id="cancelVideoEditor">Cancel</button><button type="submit" class="primary-button" id="saveVideo">Save video to library →</button></div>
+ </form>
+</dialog>
 </body></html>
